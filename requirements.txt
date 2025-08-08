@@ -1,0 +1,12 @@
+ollama
+requests
+fastapi
+uvicorn
+pydantic
+chromadb
+sentence-transformers
+opencv-python
+pillow
+numpy
+asyncio
+json

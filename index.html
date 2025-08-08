@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Fallout 76 AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e6ed;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            padding: 8px;
+            max-width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5f 100%);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 1px solid rgba(0,212,255,0.2);
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #00d4ff, #7b68ee, #ff6b7a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-running {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        .status-idle {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .pulse {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.3); }
+        }
+
+        /* AI Intelligence Section */
+        .ai-section {
+            background: linear-gradient(135deg, #2d1b4e 0%, #4a2c7a 100%);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .ai-title {
+            font-size: 1rem;
+            color: #9370db;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 0.75rem;
+        }
+
+        .ai-stat {
+            background: rgba(0,0,0,0.3);
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ai-stat-label {
+            color: #a0a6b0;
+            margin-bottom: 2px;
+        }
+
+        .ai-stat-value {
+            color: #9370db;
+            font-weight: 600;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card {
+            background: rgba(30, 30, 63, 0.7);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00d4ff;
+            display: block;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: #a0a6b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* Goals Management Section */
+        .goals-section {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+            border: 1px solid rgba(123, 104, 238, 0.3);
+        }
+
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .goals-title {
+            font-size: 1rem;
+            color: #7b68ee;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goals-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .goal-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .goal-item:hover {
+            background: rgba(0,0,0,0.5);
+            border-color: rgba(0,212,255,0.3);
+        }
+
+        .goal-item.enabled {
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0,212,255,0.2);
+        }
+
+        .goal-item.custom {
+            border-color: #ff6b7a;
+            box-shadow: 0 0 10px rgba(255,107,122,0.2);
+        }
+
+        .goal-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .goal-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #00d4ff;
+            margin-top: 2px;
+        }
+
+        .goal-details {
+            flex: 1;
+        }
+
+        .goal-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e0e6ed;
+            margin-bottom: 4px;
+        }
+
+        .goal-description {
+            font-size: 0.75rem;
+            color: #a0a6b0;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .goal-context {
+            font-size: 0.7rem;
+            color: #7b68ee;
+            background: rgba(123, 104, 238, 0.1);
+            padding: 4px 6px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-style: italic;
+        }
+
+        .goal-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.7rem;
+            color: #7b68ee;
+        }
+
+        .goal-type {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+
+        .goal-type.custom {
+            background: rgba(255,107,122,0.2);
+            color: #ff6b7a;
+        }
+
+        .goal-actions {
+            margin-top: 6px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .goal-action-btn {
+            padding: 2px 6px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #e0e6ed;
+        }
+
+        .goal-action-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .goal-action-btn.delete {
+            background: rgba(255,107,122,0.2);
+            color: #ff6b7a;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .quick-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-enable-all {
+            background: linear-gradient(135deg, #00c851 0%, #00ff57 100%);
+            color: #000;
+        }
+
+        .btn-disable-all {
+            background: linear-gradient(135deg, #ff3547 0%, #ff6b7a 100%);
+            color: #fff;
+        }
+
+        .btn-add-goal {
+            background: linear-gradient(135deg, #ff6b7a 0%, #ff9800 100%);
+            color: #fff;
+        }
+
+        .btn-templates {
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+            color: #fff;
+        }
+
+        /* Custom Goal Form */
+        .custom-goal-form {
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid rgba(255,107,122,0.3);
+            display: none;
+        }
+
+        .custom-goal-form.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 8px;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            color: #a0a6b0;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e0e6ed;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .form-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .form-btn.save {
+            background: #00c851;
+            color: #000;
+        }
+
+        .form-btn.cancel {
+            background: #666;
+            color: #fff;
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-top: auto;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #00c851 0%, #00ff57 100%);
+            color: #000;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ff3547 0%, #ff6b7a 100%);
+            color: #fff;
+        }
+
+        /* Log Section */
+        .log-section {
+            background: rgba(30, 30, 63, 0.4);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            max-height: 120px;
+            flex-shrink: 0;
+        }
+
+        .log-header {
+            background: rgba(0,0,0,0.4);
+            padding: 6px 8px;
+            font-size: 0.7rem;
+            color: #a0a6b0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .log-content {
+            padding: 6px;
+            max-height: 80px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.65rem;
+            line-height: 1.3;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+            color: #c0c6d0;
+        }
+
+        .log-entry.success {
+            color: #00ff57;
+        }
+
+        .log-entry.error {
+            color: #ff6b7a;
+        }
+
+        .log-entry.decision {
+            color: #00d4ff;
+        }
+
+        .log-entry.strategy {
+            color: #9370db;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .container { padding: 6px; gap: 6px; }
+            .goals-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .ai-stats { grid-template-columns: 1fr; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.5);
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Intelligent Fallout 76 AI</h1>
+            <div class="status-bar">
+                <div class="status-indicator status-idle" id="statusIndicator">
+                    <div class="pulse"></div>
+                    <span id="statusText">Idle</span>
+                </div>
+                <div style="font-size: 0.6rem; color: #a0a6b0;">
+                    <span id="currentTime">00:00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Intelligence Section -->
+        <div class="ai-section">
+            <div class="ai-title">
+                🤖 AI Intelligence Status
+            </div>
+            <div class="ai-stats">
+                <div class="ai-stat">
+                    <div class="ai-stat-label">Current Strategy</div>
+                    <div class="ai-stat-value" id="currentStrategy">Unknown</div>
+                </div>
+                <div class="ai-stat">
+                    <div class="ai-stat-label">Location</div>
+                    <div class="ai-stat-value" id="currentLocation">Unknown</div>
+                </div>
+                <div class="ai-stat">
+                    <div class="ai-stat-label">Decision Cycles</div>
+                    <div class="ai-stat-value" id="decisionCycles">0</div>
+                </div>
+                <div class="ai-stat">
+                    <div class="ai-stat-label">Actions Executed</div>
+                    <div class="ai-stat-value" id="actionsExecuted">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value" id="activeGoalsCount">0</span>
+                <span class="stat-label">Active Goals</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalGoalsCount">0</span>
+                <span class="stat-label">Total Goals</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="customGoalsCount">0</span>
+                <span class="stat-label">Custom Goals</span>
+            </div>
+        </div>
+
+        <!-- Goals Management -->
+        <div class="goals-section">
+            <div class="goals-header">
+                <div class="goals-title">
+                    🎯 F76 AI Goals
+                    <span id="goalsStatus" style="font-size: 0.7rem; color: #a0a6b0;">(Loading...)</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn btn-enable-all" id="btnEnableAll">Enable All</button>
+                <button class="quick-btn btn-disable-all" id="btnDisableAll">Disable All</button>
+                <button class="quick-btn btn-add-goal" id="btnAddGoal">+ Add Custom</button>
+                <button class="quick-btn btn-templates" id="btnTemplates">Templates</button>
+            </div>
+
+            <!-- Smart Goal Form -->
+            <div class="custom-goal-form" id="customGoalForm">
+                <div style="background: rgba(0,212,255,0.1); padding: 8px; border-radius: 4px; margin-bottom: 12px; font-size: 0.75rem; color: #00d4ff;">
+                    🧠 <strong>Smart Goal Creation:</strong> Just describe what you want in simple terms like "Complete Events" or "Farm Legendaries" - the AI will automatically generate the detailed F76 context!
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Goal ID (auto-generated or custom)</label>
+                    <input type="text" class="form-input" id="goalId" placeholder="complete_events">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Goal Name</label>
+                    <input type="text" class="form-input" id="goalName" placeholder="Complete Events">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Simple Description (AI will generate the context)</label>
+                    <input type="text" class="form-input" id="goalDescription" placeholder="Complete Events"
+                           oninput="dashboard.updateGoalSuggestions(this.value)">
+                    <div id="goalSuggestions" style="margin-top: 4px; font-size: 0.7rem; color: #7b68ee;"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority (1-10)</label>
+                    <input type="number" class="form-input" id="goalPriority" min="1" max="10" value="5">
+                </div>
+
+                <!-- AI Generated Context Preview -->
+                <div class="form-group" id="aiContextPreview" style="display: none;">
+                    <label class="form-label">🧠 AI Generated Context (Preview)</label>
+                    <div style="background: rgba(123,104,238,0.1); padding: 8px; border-radius: 4px; font-size: 0.75rem; color: #a0a6b0; font-style: italic;" id="contextPreviewText">
+                        AI context will appear here...
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button class="form-btn save" id="generateAndSave">🧠 Generate & Save</button>
+                    <button class="form-btn" id="previewContext" style="background: #7b68ee; color: #fff;">👁️ Preview</button>
+                    <button class="form-btn cancel" id="cancelCustomGoal">Cancel</button>
+                </div>
+            </div>
+
+
+            <div class="goals-grid" id="goalsContainer">
+                <!-- Goals will be populated here -->
+                <div style="color: #a0a6b0; text-align: center; padding: 20px;">Loading intelligent goals...</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-start" id="btnStart">🚀 Start Intelligent AI</button>
+            <button class="btn btn-stop" id="btnStop">🛑 Stop AI</button>
+        </div>
+
+        <!-- Log Section -->
+        <div class="log-section">
+            <div class="log-header">📡 Intelligent AI Log</div>
+            <div class="log-content" id="logContent">
+                <div class="log-entry">Intelligent Fallout 76 AI interface loaded...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class IntelligentF76Dashboard {
+            constructor() {
+                this.goals = {};
+                this.templates = {};
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.startStatusPolling();
+                this.startTimeUpdate();
+                this.loadGoals();
+                this.loadTemplates();
+                this.addLog('Intelligent Fallout 76 AI Dashboard initialized', 'success');
+            }
+
+            setupEventListeners() {
+                // Control buttons
+                document.getElementById('btnStart').onclick = () => this.startAI();
+                document.getElementById('btnStop').onclick = () => this.stopAI();
+
+                // Goal management buttons
+                document.getElementById('btnEnableAll').onclick = () => this.setAllGoals(true);
+                document.getElementById('btnDisableAll').onclick = () => this.setAllGoals(false);
+                document.getElementById('btnAddGoal').onclick = () => this.showCustomGoalForm();
+                document.getElementById('btnTemplates').onclick = () => this.showTemplates();
+
+                // Custom goal form
+                document.getElementById('generateAndSave').onclick = () => this.generateAndSaveGoal();
+                document.getElementById('previewContext').onclick = () => this.previewAIContext();
+                document.getElementById('cancelCustomGoal').onclick = () => this.hideCustomGoalForm();
+            }
+
+            async startAI() {
+                try {
+                    const response = await fetch('/command', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: 'start' })
+                    });
+
+                    if (response.ok) {
+                        const activeCount = Object.values(this.goals).filter(g => g.enabled).length;
+                        this.addLog(`🚀 Intelligent AI Started with ${activeCount} goals and deep F76 knowledge`, 'success');
+                    } else {
+                        this.addLog('❌ Failed to start intelligent AI', 'error');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to start AI: ${error.message}`, 'error');
+                }
+            }
+
+            async stopAI() {
+                try {
+                    const response = await fetch('/command', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: 'stop' })
+                    });
+
+                    if (response.ok) {
+                        this.addLog(`🛑 Intelligent AI Stopped`, 'success');
+                    } else {
+                        this.addLog('❌ Failed to stop AI', 'error');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to stop AI: ${error.message}`, 'error');
+                }
+            }
+
+            async loadGoals() {
+                try {
+                    const response = await fetch('/goals');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.goals = data.goals;
+                        this.renderGoals();
+                        this.updateGoalStats(data);
+                        this.addLog(`📋 Loaded ${data.total_count} intelligent goals (${data.custom_count} custom)`, 'success');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to load goals: ${error.message}`, 'error');
+                }
+            }
+
+            async loadTemplates() {
+                try {
+                    const response = await fetch('/goals/templates');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.templates = data.templates;
+                    }
+                } catch (error) {
+                    console.log('Templates not available');
+                }
+            }
+
+            renderGoals() {
+                const container = document.getElementById('goalsContainer');
+                container.innerHTML = '';
+
+                if (!this.goals || Object.keys(this.goals).length === 0) {
+                    container.innerHTML = '<div style="color: #a0a6b0; text-align: center; padding: 20px;">Loading intelligent goals...</div>';
+                    return;
+                }
+
+                // Sort goals by type and priority
+                const sortedGoals = Object.entries(this.goals).sort((a, b) => {
+                    // Custom goals first
+                    if (a[1].type === 'custom' && b[1].type !== 'custom') return -1;
+                    if (b[1].type === 'custom' && a[1].type !== 'custom') return 1;
+                    // Then by priority
+                    return b[1].priority - a[1].priority;
+                });
+
+                sortedGoals.forEach(([goalId, goal]) => {
+                    const goalElement = document.createElement('div');
+                    goalElement.className = `goal-item ${goal.enabled ? 'enabled' : ''} ${goal.type === 'custom' ? 'custom' : ''}`;
+                    goalElement.innerHTML = `
+                        <label class="goal-checkbox">
+                            <input type="checkbox" ${goal.enabled ? 'checked' : ''}
+                                   onchange="dashboard.toggleGoal('${goalId}', this.checked)">
+                            <div class="goal-details">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <div class="goal-name">${goal.name}</div>
+                                    <div class="goal-type ${goal.type === 'custom' ? 'custom' : ''}">${goal.type}</div>
+                                </div>
+                                <div class="goal-description">${goal.description}</div>
+                                ${goal.ai_context ? `<div class="goal-context">AI: ${goal.ai_context}</div>` : ''}
+                                <div class="goal-stats">
+                                    <span>Priority: ${goal.priority}</span>
+                                    ${goal.success_indicators && goal.success_indicators.length > 0 ?
+                                        `<span>Success: ${goal.success_indicators.join(', ')}</span>` : ''}
+                                </div>
+                                ${goal.type === 'custom' ? `
+                                    <div class="goal-actions">
+                                        <button class="goal-action-btn delete" onclick="dashboard.deleteCustomGoal('${goalId}')">Delete</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </label>
+                    `;
+                    container.appendChild(goalElement);
+                });
+
+                this.updateGoalCount();
+            }
+
+            async toggleGoal(goalId, enabled) {
+                try {
+                    const response = await fetch('/goals/set', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ goal_id: goalId, enabled: enabled })
+                    });
+
+                    if (response.ok) {
+                        this.goals[goalId].enabled = enabled;
+                        this.updateGoalStates();
+                        this.addLog(`🎯 ${this.goals[goalId].name} ${enabled ? 'enabled' : 'disabled'}`, 'success');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to toggle goal: ${error.message}`, 'error');
+                }
+            }
+
+            async setAllGoals(enabled) {
+                const goalUpdates = {};
+                Object.keys(this.goals).forEach(goalId => {
+                    goalUpdates[goalId] = enabled;
+                });
+
+                try {
+                    const response = await fetch('/goals/batch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ goals: goalUpdates })
+                    });
+
+                    if (response.ok) {
+                        Object.keys(this.goals).forEach(goalId => {
+                            this.goals[goalId].enabled = enabled;
+                        });
+                        this.renderGoals();
+                        this.addLog(`🎯 ${enabled ? 'Enabled' : 'Disabled'} all intelligent goals`, 'success');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to update goals: ${error.message}`, 'error');
+                }
+            }
+
+            showCustomGoalForm() {
+                document.getElementById('customGoalForm').classList.add('show');
+                this.addLog('📝 Custom goal creation form opened', 'success');
+            }
+
+            hideCustomGoalForm() {
+                document.getElementById('customGoalForm').classList.remove('show');
+                document.getElementById('aiContextPreview').style.display = 'none';
+                // Clear form
+                document.getElementById('goalId').value = '';
+                document.getElementById('goalName').value = '';
+                document.getElementById('goalDescription').value = '';
+                document.getElementById('goalPriority').value = 5;
+                document.getElementById('goalSuggestions').innerHTML = '';
+                document.getElementById('contextPreviewText').textContent = 'AI context will appear here...';
+            }
+
+            async updateGoalSuggestions(partialInput) {
+                if (partialInput.length < 2) {
+                    document.getElementById('goalSuggestions').innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/goals/suggestions/${encodeURIComponent(partialInput)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.suggestions && data.suggestions.length > 0) {
+                            const suggestionsHtml = data.suggestions.map(suggestion =>
+                                `<span style="cursor: pointer; margin-right: 8px; padding: 2px 4px; background: rgba(123,104,238,0.2); border-radius: 3px;"
+                                 onclick="dashboard.applySuggestion('${suggestion}')">${suggestion}</span>`
+                            ).join('');
+                            document.getElementById('goalSuggestions').innerHTML = `💡 Suggestions: ${suggestionsHtml}`;
+                        } else {
+                            document.getElementById('goalSuggestions').innerHTML = '';
+                        }
+                    }
+                } catch (error) {
+                    console.log('Suggestions not available');
+                }
+            }
+
+            applySuggestion(suggestion) {
+                document.getElementById('goalDescription').value = suggestion;
+                document.getElementById('goalName').value = suggestion;
+
+                // Auto-generate goal ID
+                const goalId = suggestion.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                document.getElementById('goalId').value = goalId;
+
+                document.getElementById('goalSuggestions').innerHTML = '';
+                this.addLog(`💡 Applied suggestion: ${suggestion}`, 'success');
+            }
+
+            async previewAIContext() {
+                const description = document.getElementById('goalDescription').value.trim();
+                const name = document.getElementById('goalName').value.trim();
+                const priority = parseInt(document.getElementById('goalPriority').value);
+
+                if (!description) {
+                    this.addLog('❌ Please enter a goal description first', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/goals/smart/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            goal_id: 'preview',
+                            name: name || description,
+                            description: description,
+                            priority: priority
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('contextPreviewText').textContent = data.generated_goal.ai_context;
+                        document.getElementById('aiContextPreview').style.display = 'block';
+                        this.addLog(`👁️ AI context preview generated for "${description}"`, 'success');
+                    } else {
+                        const error = await response.json();
+                        this.addLog(`❌ Failed to generate preview: ${error.detail}`, 'error');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to generate preview: ${error.message}`, 'error');
+                }
+            }
+
+            async generateAndSaveGoal() {
+                const goalData = {
+                    goal_id: document.getElementById('goalId').value.trim(),
+                    name: document.getElementById('goalName').value.trim(),
+                    description: document.getElementById('goalDescription').value.trim(),
+                    priority: parseInt(document.getElementById('goalPriority').value)
+                };
+
+                // Validation
+                if (!goalData.description) {
+                    this.addLog('❌ Please enter a goal description', 'error');
+                    return;
+                }
+
+                if (!goalData.goal_id) {
+                    // Auto-generate goal ID from description
+                    goalData.goal_id = goalData.description.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                    document.getElementById('goalId').value = goalData.goal_id;
+                }
+
+                if (!goalData.name) {
+                    goalData.name = goalData.description;
+                }
+
+                if (!/^[a-z0-9_]+$/.test(goalData.goal_id)) {
+                    this.addLog('❌ Goal ID must contain only lowercase letters, numbers, and underscores', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/goals/smart/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(goalData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.hideCustomGoalForm();
+                        this.loadGoals(); // Reload goals
+                        this.addLog(`🧠 Smart goal '${result.goal_name}' created with AI-generated F76 context!`, 'success');
+                        this.addLog(`🎯 AI Context: ${result.ai_context.substring(0, 100)}...`, 'strategy');
+                    } else {
+                        const error = await response.json();
+                        this.addLog(`❌ Failed to create smart goal: ${error.detail}`, 'error');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to create smart goal: ${error.message}`, 'error');
+                }
+            }
+
+            async deleteCustomGoal(goalId) {
+                if (!confirm(`Are you sure you want to delete the custom goal '${this.goals[goalId].name}'?`)) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/goals/custom/${goalId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        delete this.goals[goalId];
+                        this.renderGoals();
+                        this.addLog(`🗑️ Custom goal deleted successfully`, 'success');
+                    } else {
+                        const error = await response.json();
+                        this.addLog(`❌ Failed to delete goal: ${error.detail}`, 'error');
+                    }
+                } catch (error) {
+                    this.addLog(`❌ Failed to delete goal: ${error.message}`, 'error');
+                }
+            }
+
+            showTemplates() {
+                if (Object.keys(this.templates).length === 0) {
+                    this.addLog('📋 No templates available yet', 'error');
+                    return;
+                }
+
+                let templateHtml = 'Available F76 Goal Templates:\n\n';
+                Object.entries(this.templates).forEach(([id, template]) => {
+                    templateHtml += `${template.name}: ${template.description}\n`;
+                });
+
+                alert(templateHtml);
+                this.addLog('📋 Displayed F76 goal templates', 'success');
+            }
+
+            updateGoalStates() {
+                const goalItems = document.querySelectorAll('.goal-item');
+                goalItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    if (checkbox.checked) {
+                        item.classList.add('enabled');
+                    } else {
+                        item.classList.remove('enabled');
+                    }
+                });
+                this.updateGoalCount();
+            }
+
+            updateGoalCount() {
+                const activeCount = Object.values(this.goals).filter(g => g.enabled).length;
+                const totalCount = Object.keys(this.goals).length;
+                const customCount = Object.values(this.goals).filter(g => g.type === 'custom').length;
+
+                document.getElementById('goalsStatus').textContent = `(${activeCount}/${totalCount} active)`;
+                document.getElementById('activeGoalsCount').textContent = activeCount;
+                document.getElementById('totalGoalsCount').textContent = totalCount;
+                document.getElementById('customGoalsCount').textContent = customCount;
+            }
+
+            updateGoalStats(data) {
+                document.getElementById('activeGoalsCount').textContent = data.active_count || 0;
+                document.getElementById('totalGoalsCount').textContent = data.total_count || 0;
+                document.getElementById('customGoalsCount').textContent = data.custom_count || 0;
+            }
+
+            async fetchStatus() {
+                try {
+                    const response = await fetch('/status');
+                    if (!response.ok) throw new Error('Server not responding');
+
+                    const data = await response.json();
+                    this.updateStatus(data);
+
+                } catch (error) {
+                    // Connection lost - continue silently
+                }
+            }
+
+            updateStatus(data) {
+                // Update status indicator
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+
+                statusIndicator.classList.remove('status-running', 'status-idle');
+
+                if (data.status === 'Running') {
+                    statusIndicator.classList.add('status-running');
+                    statusText.textContent = 'Active';
+                } else {
+                    statusIndicator.classList.add('status-idle');
+                    statusText.textContent = 'Idle';
+                }
+
+                // Update AI intelligence stats
+                if (data.ai_intelligence) {
+                    document.getElementById('currentStrategy').textContent = data.ai_intelligence.current_strategy || 'Unknown';
+                    document.getElementById('currentLocation').textContent = data.ai_intelligence.current_location || 'Unknown';
+                    document.getElementById('decisionCycles').textContent = data.ai_intelligence.cycle_count || 0;
+                    document.getElementById('actionsExecuted').textContent = data.ai_intelligence.execution_count || 0;
+                }
+
+                // Log new entries from server
+                if (data.log && Array.isArray(data.log)) {
+                    const recentEntries = data.log.slice(0, 3);
+                    recentEntries.forEach(entry => {
+                        if (!this.lastLoggedEntries || !this.lastLoggedEntries.includes(entry)) {
+                            const type = entry.includes('❌') ? 'error' :
+                                        entry.includes('✅') ? 'success' :
+                                        entry.includes('🧠') ? 'decision' :
+                                        entry.includes('📋') ? 'strategy' : 'info';
+                            this.addLog(entry, type);
+                        }
+                    });
+                    this.lastLoggedEntries = recentEntries;
+                }
+            }
+
+            addLog(message, type = 'info') {
+                const logContent = document.getElementById('logContent');
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+
+                const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+                logEntry.textContent = message.includes('[') ? message : `[${now}] ${message}`;
+
+                logContent.appendChild(logEntry);
+
+                // Keep only last 50 entries
+                const entries = logContent.querySelectorAll('.log-entry');
+                if (entries.length > 50) {
+                    entries[0].remove();
+                }
+
+                // Scroll to bottom
+                logContent.scrollTop = logContent.scrollHeight;
+            }
+
+            startStatusPolling() {
+                this.fetchStatus();
+                setInterval(() => this.fetchStatus(), 2000);
+            }
+
+            startTimeUpdate() {
+                const updateTime = () => {
+                    const now = new Date();
+                    document.getElementById('currentTime').textContent =
+                        now.toLocaleTimeString('en-US', { hour12: false });
+                };
+
+                updateTime();
+                setInterval(updateTime, 1000);
+            }
+        }
+
+        // Initialize intelligent dashboard
+        let dashboard;
+        window.addEventListener('DOMContentLoaded', () => {
+            dashboard = new IntelligentF76Dashboard();
+        });
+    </script>
+</body>
+</html>
