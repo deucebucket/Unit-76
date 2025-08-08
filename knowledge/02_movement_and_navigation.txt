@@ -1,0 +1,139 @@
+# **Knowledge Base: Movement and Navigation Protocol**
+
+### **Foreword: Document Purpose and Design Philosophy**
+
+This document provides the operational logic for the Movement and Navigation subsystem. It is designed for a simple robotic agent with a contextual vision system and a discrete action set. The instructions are formulated as unambiguous, rule-based directives using IF-THEN logic to facilitate direct implementation. The core philosophy is to build a robust system that can handle common traversal scenarios and recover from a "stuck" state. This state is a frequent occurrence in the target environment, *Fallout 76*, and recovery must be achieved using only the provided VALID ACTIONS.
+
+---
+
+## **Section 1: Core Movement Principles**
+
+This section establishes the foundational rules for basic locomotion and environmental interaction. Mastery of these principles is a prerequisite for identifying and resolving complex navigational failures, such as the "stuck" state detailed in Section 2\.
+
+### **1.1 Primary Locomotion Directives**
+
+The default state of the unit is forward motion. The choice between standard and high-speed traversal is governed by resource management. The primary resource for movement is Action Points (AP). While AP is commonly associated with combat functions like V.A.T.S., it is also consumed by the SPRINT action.1 Furthermore, AP is the sole resource enabling movement when the unit is over-encumbered, a common condition in the environment.2
+
+This dual-use nature of AP means it must be treated as a general energy reserve, not one to be held exclusively for combat. A depleted AP bar not only prevents high-speed travel but can also inhibit escape maneuvers. Therefore, the unit's logic must include a self-preservation rule: if AP levels fall below a critical threshold, the WAIT command should be issued to allow for regeneration, unless an immediate threat overrides this directive.
+
+The primary locomotion rules are as follows:
+
+* **IF** the vision system reports "The path is clear" **AND** AP is above the designated threshold for sprinting, **THEN** execute SPRINT for maximum traversal speed.
+* **IF** the vision system reports "The path is clear" **AND** AP is below the sprinting threshold, **THEN** execute FORWARD to conserve the remaining AP.
+
+### **Table 1: Vision-to-Action Logic Matrix**
+
+To ensure unambiguous operation, all high-level visual inputs are mapped directly to a specific action command. This matrix forms the core decision tree for the unit's moment-to-moment navigation.
+
+| Vision System Output | Logical Condition (IF) | Action Command (THEN) | Notes / Rationale |
+| :---- | :---- | :---- | :---- |
+| "The path is clear" | path\_is\_clear \== TRUE | SPRINT or FORWARD | SPRINT is default if AP\_level \> sprint\_threshold. Otherwise, FORWARD. |
+| "Obstacle ahead" | obstacle\_detected \== TRUE | WAIT | Cease forward motion. Prepare for re-orientation or obstacle analysis. |
+| "Path blocked on left" | path\_blocked\_left \== TRUE | SMOOTH\_LOOK (right), STRAFE\_RIGHT | Basic avoidance. |
+| "Path blocked on right" | path\_blocked\_right \== TRUE | SMOOTH\_LOOK (left), STRAFE\_LEFT | Basic avoidance. |
+| "Small obstacle ahead" | obstacle\_is\_low \== TRUE | JUMP | To surmount climbable geometry. |
+| "View has not changed" | position\_unchanged\_counter \>= 3 | INITIATE\_UNSTUCK\_PROTOCOL | Trigger for advanced error recovery (See Section 2). |
+| "Interactable object" | interactable\_object\_detected \== TRUE | INTERACT | For quest progression or as part of Unstuck Protocol Gamma. |
+| "Hostile entity detected" | hostile\_detected \== TRUE | INITIATE\_COMBAT\_PROTOCOL | Transfers control to a different knowledge base module. |
+
+### **1.2 Obstacle and Hazard Avoidance**
+
+The environment is known to contain irregular geometry and "invisible walls" that can impede movement.3 A simple
+
+FORWARD-until-blocked logic is therefore insufficient. The unit must proactively navigate around obstructions.
+
+Upon the vision system reporting "Obstacle ahead," the unit will execute WAIT and initiate an obstacle evaluation sub-routine. This routine consists of:
+
+1. Executing SMOOTH\_LOOK to scan the immediate vicinity (e.g., 45 degrees left, then 90 degrees right from center).
+2. Identifying the clearest alternate path from the scan.
+3. Executing STRAFE\_LEFT or STRAFE\_RIGHT to align with the new path.
+4. Resuming FORWARD or SPRINT as per the primary locomotion directives.
+
+Caution must be exercised in confined spaces. Players frequently report getting stuck in doorways or on small pieces of environmental clutter.4 Therefore, if the vision system reports "I am in a narrow space," the unit should default to the
+
+FORWARD command, disabling SPRINT to reduce the likelihood of clipping into adjacent geometry at high speed.
+
+### **1.3 Vertical Traversal**
+
+The JUMP command is a fundamental component of navigation, not merely an emergency maneuver. The terrain of the operational area is highly varied, and vertical movement is key to efficient traversal. Players consistently use jumping to overcome obstacles and to free themselves when stuck.2
+
+The rules for vertical traversal are:
+
+* **IF** the vision system reports "Small obstacle ahead" **AND** "Path is clear beyond obstacle," **THEN** execute JUMP while maintaining forward momentum.
+* **IF** the vision system reports "Higher ledge reachable," **THEN** execute FORWARD followed by JUMP to ascend.
+
+The JUMP command should be considered a standard tool in the unit's navigational repertoire, allowing it to overcome terrain that would otherwise be classified as an impassable obstacle.
+
+---
+
+## **Section 2: The Stuck State: Identification and Recovery Protocol**
+
+This section provides a robust, hierarchical protocol for the unit to recover from a "stuck" state. This state is a common and mission-critical failure point that must be handled autonomously.
+
+### **2.1 Defining and Identifying a Stuck State**
+
+A "stuck" state is not a subjective assessment but a machine-measurable condition. It is defined by the following logic:
+
+* **Condition:** The FORWARD command has been issued for multiple consecutive processing cycles.
+* **Feedback:** The vision system reports "View has not changed" for the same number of consecutive cycles.
+
+An internal counter, position\_unchanged\_counter, will track this condition. If this counter reaches a predefined threshold (e.g., 3 cycles), the unit's state transitions from STATE: NAVIGATING to STATE: STUCK, and the INITIATE\_UNSTUCK\_PROTOCOL command is executed. This condition corresponds to player reports of being "stuck on geometry" 8, being unable to move 9, or running in place.9
+
+The causes for this state are varied and beyond the diagnostic capabilities of the unit. They range from simple physical collision with world geometry 3 to engine-level bugs related to Power Armor 5 or excessively high frame rates, particularly indoors.10 Because the unit cannot determine the root cause, it cannot tailor a specific solution. The only available information is the symptom: a
+
+FORWARD command results in no change in position. This limitation dictates the design of the recovery protocol: it must be a universal, hierarchical sequence of actions that attempts to solve the problem without knowing its cause. The protocol prioritizes attempts to resolve physical collisions, as this is the only cause the unit can directly influence with its available actions.
+
+### **2.2 Unstuck Protocol Alpha: The Wiggle Maneuver (Physical Dislodging)**
+
+This is the primary, first-line response. It translates the "wiggling" and "jumping" behaviors described by human players 7 into a discrete, repeatable sequence of actions. The goal is to physically shift the unit's collision model to free it from the snagging geometry. The entire sequence must be executed before re-evaluating the stuck state.
+
+* **Step 1: Immediate Reversal.**
+  * **Action:** BACKWARD (for a duration of 1 second).
+  * **Rationale:** The most logical first step is to attempt movement in the opposite direction of the blockage. This aligns with player advice to retrace one's steps to get unstuck.5
+* **Step 2: Jump and Reverse.**
+  * **Action:** JUMP \+ BACKWARD (executed simultaneously). Repeat 3 times.
+  * **Rationale:** This adds a vertical vector to the reversal. Many geometry snags occur at waist or foot level; a jump can lift the collision model over the snag point. This is a direct implementation of player advice to repeatedly jump.2
+* **Step 3: Lateral Jolt Left.**
+  * **Action:** STRAFE\_LEFT (duration 0.5 seconds) followed by JUMP. Repeat 2 times.
+  * **Rationale:** If direct reversal fails, the snag may be on the unit's side. This action attempts to dislodge the model laterally, a core component of the "wiggling" technique.7
+* **Step 4: Lateral Jolt Right.**
+  * **Action:** STRAFE\_RIGHT (duration 0.5 seconds) followed by JUMP. Repeat 2 times.
+  * **Rationale:** This is the symmetrical opposite of Step 3, addressing the possibility of a snag on the right side.
+* **Step 5: Rotational Shift and Reverse.**
+  * **Action:** SMOOTH\_LOOK (left 45 degrees) followed by BACKWARD (duration 1 second).
+  * **Rationale:** The unit's collision model is not a perfect cylinder. Changing the angle of the model relative to the geometry can alter collision physics and potentially free it from the snag.
+* **Step 6: Counter-Rotational Shift and Reverse.**
+  * **Action:** SMOOTH\_LOOK (right 90 degrees) followed by BACKWARD (duration 1 second).
+  * **Rationale:** The symmetrical opposite of Step 5\. By the end of Protocol Alpha, the unit will have attempted to move backward, backward-and-up, left-and-up, right-and-up, and backward at two different angles, constituting a comprehensive physical attempt to break free.
+
+### **2.3 Unstuck Protocol Beta: State-Change Interrupts**
+
+If Protocol Alpha fails, the issue may be a game state bug rather than a simple physical snag. This protocol attempts to force a change in the unit's animation state, which can sometimes reset its position or physics data. This is a lower-probability solution attempted only after physical maneuvers have failed. This logic is derived from player reports of successfully using non-movement actions, like changing weapons 7 or using an emote 12, to break out of a bugged state.
+
+* **Step 1: Aim Down Sights Toggle.**
+  * **Action:** AIM. WAIT (1 second). AIM (to toggle off).
+  * **Rationale:** This forces the character model into and out of the "aiming" animation state, which can be sufficient to jolt the unit's position data.
+* **Step 2: Reload Weapon.**
+  * **Action:** RELOAD.
+  * **Rationale:** This triggers a different, often longer animation sequence, providing another opportunity to force a state reset.
+
+### **2.4 Unstuck Protocol Gamma: Interaction Scan**
+
+This is the final protocol attempted before classifying the situation as an unrecoverable failure. This protocol leverages the environment itself to force a position change. The logic is based on a critical observation where a player became unstuck by interacting with world objects like a piano or a chair, which teleports the character to a specific interaction node.6
+
+* **Step 1: Scan for Interactable Objects.**
+  * **Action:** SMOOTH\_LOOK (perform a slow, 360-degree horizontal scan).
+  * **Rationale:** The unit must actively search its immediate surroundings for a potential environmental solution.
+* **Step 2: Attempt Interaction.**
+  * **Action:** **IF** the vision system reports "Interactable object in range," **THEN** INTERACT.
+  * **Rationale:** If an object such as a chair, terminal, or workbench is detected, the INTERACT command will be issued. A successful interaction will move the unit to the object's use-point, resolving the stuck state. If the scan finds no objects, or if the INTERACT command fails, this protocol concludes.
+
+### **2.5 Terminal State: Unrecoverable Failure**
+
+If Protocols Alpha, Beta, and Gamma all fail to produce a change in position, the unit must conclude that it is in a state from which it cannot escape using its available actions. The operational environment contains scenarios where the only solutions are external commands that the unit cannot execute, such as fast travel 5, logging out of the server 13, or receiving assistance from another player.14
+
+A well-designed autonomous system must have a defined failure state to avoid infinite loops and wasted resources. Attempting to solve an unsolvable problem is inefficient. Therefore, acknowledging limitations is a required feature. Upon the failure of all unstuck protocols, the unit will perform the following action:
+
+* **Action:** Enter STATE: CRITICAL\_FAILURE. Cease all movement actions. Broadcast a log message: "UNSTUCK PROTOCOL FAILED. MANUAL INTERVENTION REQUIRED."
+
+This final state ensures the unit stops its attempts and signals for external assistance, which is the most logical and efficient course of action when all internal capabilities have been exhausted.

@@ -1,0 +1,150 @@
+# **Protocol 1.0: Basic Questing Fundamentals**
+
+## **Section 1: Introduction to Questing Protocol**
+
+### **1.1 Protocol Objective**
+
+The primary function of the Basic Questing Protocol is to enable the unit to autonomously identify, navigate to, and complete assigned tasks, known hereafter as "quests," within the *Fallout 76* operational environment. This protocol establishes a state-driven loop that consists of three primary phases: **NAVIGATION**, **INTERACTION**, and **ERROR HANDLING**. The successful execution of quests is the primary metric for achieving the long-term goal of game mastery. All subsequent instructions are derived from the defined set of valid actions.
+
+### **1.2 Action Command Glossary**
+
+All operational behaviors are constructed exclusively from the authorized commands defined in Table 1.1. The vision system provides the conditional triggers for these actions based on its contextual analysis of the environment. The SMOOTH\_LOOK command is the sole method for adjusting the unit's orientation and is therefore fundamental to all navigation and targeting procedures.
+
+**Table 1.1: Valid Action Command Glossary**
+
+| Command | Description |
+| :---- | :---- |
+| FORWARD | Initiate forward locomotion at standard speed. |
+| BACKWARD | Initiate backward locomotion at standard speed. |
+| STRAFE\_LEFT | Initiate lateral locomotion to the left at standard speed. |
+| STRAFE\_RIGHT | Initiate lateral locomotion to the right at standard speed. |
+| JUMP | Execute a vertical leap to traverse small obstacles. |
+| SPRINT | Initiate accelerated forward locomotion. This action consumes Action Points (AP). |
+| INTERACT | Execute the primary context-sensitive action on the object or entity centered in the visual field. This includes talking to persons, picking up items, or activating devices. |
+| RELOAD | Reload the currently equipped weapon system. |
+| VATS | Toggle the Vault-Tec Assisted Targeting System for combat. |
+| ATTACK | Discharge the currently equipped weapon or perform a melee strike. |
+| AIM | Toggle fine-aim mode, also known as aiming down sights. |
+| SMOOTH\_LOOK | Adjust the unit's camera orientation for turning and vertical aiming. |
+| WAIT | Cease all other actions for a defined period. Used for synchronization and error recovery. |
+
+## **Section 2: Visual Cue Analysis and Quest Tracking**
+
+### **2.1 The Quest Marker: Identification and State Analysis**
+
+The primary navigational input is the **Quest Marker**, a visual icon on the Heads-Up Display (HUD). The vision system must identify this marker on the compass at the bottom-center of the HUD and as a floating icon within the world space. The marker's visual characteristics convey critical state information.
+
+The shape of the marker indicates the type of quest. A yellow diamond signifies a main or major quest objective, while a yellow square denotes a side, daily, or miscellaneous quest objective.1 A critical state change occurs when the unit nears the objective location. The marker will transform from a directional shape (diamond or square) into a filled circle, indicating that the objective is within the immediate vicinity.1 This transformation is the primary trigger to transition from the
+
+**NAVIGATION** protocol to the **INTERACTION** protocol. This prevents the unit from overshooting its target and signals a shift from long-range travel to local area searching.
+
+**Table 2.1: Quest Marker State Definitions**
+
+| Icon Shape | Meaning | Location | Required Protocol |
+| :---- | :---- | :---- | :---- |
+| Yellow Diamond | Active Main/Major Quest Objective | Compass & World Space | Navigation Protocol (3.1) |
+| Yellow Square | Active Side/Daily/Misc Quest Objective | Compass & World Space | Navigation Protocol (3.1) |
+| Circle / Filled Area | Objective is within the immediate vicinity | World Space | Objective Arrival Protocol (3.3), Interaction Protocol (4.0) |
+| Hollow/Black Square | Inactive Quest | Map Only | Quest Focus Protocol (2.2) |
+
+### **2.2 Quest Focus Protocol**
+
+The operational environment frequently presents multiple simultaneous quest markers on the HUD. This can create navigational ambiguity, clutter the compass, and cause system logic to oscillate between targets.2 To ensure deterministic and efficient behavior, a single quest must be designated as "active" at all times. This is achieved by accessing the Pip-Boy's "DATA" tab and de-selecting all quests except for the current target, ensuring only one primary yellow marker is visible on the compass.5
+
+Rule 2.2.1: Enforcing Singular Focus
+IF vision\_system.reports("multiple quest markers on compass")
+THEN EXECUTE high\_level\_function("Set Exclusive Quest Focus")
+This high-level function ensures that only one quest is toggled "on" in the Pip-Boy data menu, simplifying navigation to a single vector.
+
+### **2.3 Error Protocol: Marker Signal Loss**
+
+Analysis of the operational environment reveals that the quest marker system is subject to frequent failure. Markers may fail to render on the compass or in the world space due to server lag or specific conditions such as the unit being inside Power Armor.8 This is not an edge case but an expected failure state. System robustness depends on the ability to handle this loss of guidance. The most common cause is a delay in data streaming from the server.8 A simple
+
+WAIT can often resolve these transient issues by allowing the system time to re-synchronize.
+
+Protocol 2.3.1: Transient Signal Loss Recovery
+IF quest\_marker.is\_visible \== FALSE for \> 5 seconds AND objective\_arrival\_flag \== FALSE:
+THEN EXECUTE WAIT(15\_seconds).
+THEN RE-EVALUATE quest\_marker.is\_visible.
+IF quest\_marker.is\_visible \== FALSE:
+THEN EXECUTE high\_level\_function("Re-acquire Quest Track"). This function involves opening the Pip-Boy and toggling the quest off and on again, which has been observed to force the marker to reappear.8
+
+ELSE RESUME Navigation Protocol (3.1).
+
+## **Section 3: Navigation and Movement Protocol**
+
+### **3.1 Primary Navigation Loop**
+
+The core of questing is physical traversal toward the active quest marker. This protocol is a continuous loop designed to maintain a direct course to the objective.
+
+Rule 3.1.1: Orientation
+IF quest\_marker.is\_visible \== TRUE AND quest\_marker.horizontal\_position\!= CENTER:
+THEN EXECUTE SMOOTH\_LOOK(direction=quest\_marker.direction) until quest\_marker.horizontal\_position \== CENTER.
+Rule 3.1.2: Locomotion
+IF quest\_marker.is\_visible \== TRUE AND quest\_marker.horizontal\_position \== CENTER AND vision\_system.reports("path is clear"):
+THEN EXECUTE FORWARD.
+IF SPRINT\_AUTHORIZED \== TRUE AND $AP \> threshold$:
+THEN EXECUTE SPRINT.
+
+### **3.2 Obstacle Negotiation Sub-routines**
+
+The environment is not always clear. The vision system's contextual analysis ("I see a large object," "The path is blocked") is the trigger for these sub-routines, which are designed to navigate around common obstructions.11
+
+Rule 3.2.1: Path Blockage
+IF vision\_system.reports("path is blocked") AND current\_action \== FORWARD:
+THEN EXECUTE STRAFE\_LEFT for 2 seconds.
+THEN RE-EVALUATE path.
+IF vision\_system.reports("path is still blocked"):
+THEN EXECUTE STRAFE\_RIGHT for 4 seconds.
+THEN RE-EVALUATE path.
+Rule 3.2.2: Minor Obstacles
+IF vision\_system.reports("small vertical obstacle"):
+THEN EXECUTE JUMP.
+
+### **3.3 Objective Arrival Protocol**
+
+This protocol is triggered by the visual change in the quest marker, signifying arrival at the target area.1 It acts as a critical state transition, halting long-range travel and initiating local search procedures.
+
+Rule 3.3.1: State Transition
+IF quest\_marker.shape \== CIRCLE:
+THEN SET objective\_arrival\_flag \= TRUE.
+THEN CEASE all FORWARD/SPRINT actions.
+THEN INITIATE Interaction Protocol (4.0).
+
+## **Section 4: Objective Interaction Protocol**
+
+### **4.1 Target Interaction Procedure**
+
+Upon arrival at the objective area (objective\_arrival\_flag \== TRUE), the unit must identify the specific target for interaction. The quest marker may be located directly on the target object or person, but it can also indicate a general area that requires a systematic search.8
+
+Rule 4.1.1: Local Search and Interact
+IF objective\_arrival\_flag \== TRUE:
+THEN EXECUTE SMOOTH\_LOOK(pattern=search\_grid) until vision\_system.reports("I see an interactable object") OR vision\_system.reports("I see a person").
+IF vision\_system.reports("I see an interactable object") OR vision\_system.reports("I see a person"):
+THEN EXECUTE SMOOTH\_LOOK to center the target.
+THEN EXECUTE INTERACT.
+
+### **4.2 Dialogue Tree Navigation**
+
+Interaction with persons initiates a dialogue interface. Analysis of this system reveals that dialogue choices are often superficial and do not significantly alter quest outcomes. Instead, they serve primarily to gate narrative progression, forcing the user down a predetermined conversational path.12 The complexity of human dialogue is, for the purpose of this system, an illusion. The most efficient strategy is not to analyze the semantic content of the options, but to execute a simple, deterministic rule to proceed. This approach guarantees progression without expending processing cycles on what is effectively a non-strategic choice.
+
+Protocol 4.2.1: Deterministic Dialogue Resolution
+IF vision\_system.reports("dialogue options are visible"):
+THEN SELECT first\_available\_option.
+THEN EXECUTE INTERACT.
+REPEAT until vision\_system.reports("dialogue options are not visible").
+
+### **4.3 Error Protocol: Interaction Failure**
+
+NPCs can become unresponsive to the INTERACT command. This is a known bug that can be caused by the NPC being locked in another animation (e.g., smoking, working at a bench) or by general server desynchronization.13 Like marker loss, this is an expected failure state that requires a recovery protocol to prevent the unit from becoming stuck in an infinite loop. The recovery procedure involves waiting and then slightly altering the unit's position and orientation to re-trigger the interaction prompt.
+
+Protocol 4.3.1: Unresponsive Target Recovery
+IF action.INTERACT fails to trigger response for \> 3 seconds:
+THEN EXECUTE WAIT(5\_seconds).
+THEN RE-ATTEMPT INTERACT.
+IF action.INTERACT still fails:
+THEN EXECUTE BACKWARD for 1 second.
+THEN EXECUTE STRAFE\_LEFT for 1 second.
+THEN EXECUTE FORWARD for 1 second.
+THEN RE-ATTEMPT INTERACT.
+IF action.INTERACT still fails after 3 cycles, log error and proceed to the next available task.

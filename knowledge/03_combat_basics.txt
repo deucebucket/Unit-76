@@ -1,0 +1,191 @@
+Knowledge Base: Unit Operations Manual - DOC ID: BCR-001 - Basic Combat Rules (BCR)
+
+This document establishes the foundational combat doctrine for all operational units within the Fallout 76 simulation environment. Its purpose is to define a simple, robust, and safe set of rules for engaging hostile entities and ensuring unit survivability. The protocols herein are designed for a unit with a contextual vision system and a restricted set of valid action commands. All logic is presented in a machine-readable IF-THEN format. This document is divided into three primary sections: Threat Identification and Engagement Protocol (TIEP), Self-Preservation and Disengagement Protocol (SPDP), and the overarching Protocol Hierarchy that governs their execution.
+
+Section 1: Threat Identification and Engagement Protocol (TIEP)
+
+This section defines the conditions under which the unit will enter a combat state and the precise sequence of actions to be taken. The TIEP is the unit's primary offensive doctrine.
+
+1.1 Threat Classification and Validation
+
+The unit's vision system provides simplified, high-level classifications of objects in the environment. The Basic Combat Rules must translate these general classifications into actionable triggers for engagement. The primary trigger for initiating the TIEP is the visual confirmation of an entity classified as a "person" or "creature."
+Analysis of the operational environment confirms that the world is populated by a wide variety of hostile entities that fall under these general descriptors. These threats include, but are not limited to:
+Humanoid Threats ("person"): This category encompasses entities such as Feral Ghouls, Scorched, Super Mutants, and Mole Miners.1 While some humans may be non-hostile, the pervasive danger of the environment necessitates a cautious approach.
+Non-Humanoid Threats ("creature"): This category includes a diverse range of aggressive fauna and mutated beings, such as Radscorpions, Deathclaws, Mongrels, and various cryptids like the Snallygaster and Mothman.3
+Given the high density of hostile entities, any "person" or "creature" not explicitly designated as friendly or neutral by a future system update must be considered a potential threat. This justifies a universal "engage-on-sight" sub-protocol. This approach bridges the gap between the unit's simple perception and the environment's complex reality, prioritizing safety by proactively addressing potential dangers.
+
+1.2 The VATS-First Doctrine: A Mandate for Efficiency and Accuracy
+
+The absolute first action upon threat identification is the activation of the Vault-Tec Assisted Targeting System (VATS). This is not an optional tactic but a mandatory, hard-coded step in the engagement sequence. This doctrine is established for several critical reasons based on the unique nature of VATS in this environment.
+Unlike its implementation in prior simulations, VATS in Fallout 76 operates in real-time, meaning it does not slow or pause the game world.5 This continuous real-time operation makes the unit perpetually vulnerable during combat. The
+VATS system provides an automated targeting solution, displaying a percentage chance to hit a designated target.5 By relying on this built-in function, the unit offloads the complex computational task of manual aiming, which would otherwise require sophisticated predictive algorithms to handle the often erratic and unpredictable movement of enemies.7
+For a system with a limited action set, using VATS is vastly more efficient and reliable than attempting to replicate human-like fine motor control with the AIM and SMOOTH_LOOK commands. The VATS system effectively "locks on" to a target, ensuring that subsequent ATTACK commands are directed correctly, even if the unit is not perfectly facing the enemy or during moments of chaotic movement.5 This function is analogous to a system service call for a complex calculation; it is more efficient to let the game's optimized, pre-built system handle targeting than to attempt a less reliable simulation. Furthermore, activating
+VATS can serve as an early warning system, highlighting enemies or hazards that the primary vision system may not have fully processed, further cementing its role as the initial action in any engagement.9
+
+1.3 Rule Set: Standard Combat Engagement Logic
+
+The TIEP is codified into the following sequential logic flow. These rules are to be executed in order upon the satisfaction of their initial trigger condition.
+RULE 101: THREAT DETECTED
+IF vision system reports "person" OR "creature" in the field of view,
+AND IF SPDP is not active,
+THEN execute VATS.
+RULE 102: TARGET ACQUIRED
+IF VATS has successfully targeted an enemy (indicated by a percentage-to-hit display),
+AND IF SPDP is not active,
+THEN execute ATTACK.
+RULE 103: REPEAT ENGAGEMENT
+IF target remains active after ATTACK execution (i.e., not neutralized),
+AND IF SPDP is not active,
+THEN loop back to RULE 102 and execute ATTACK again.
+ELSE IF target is neutralized,
+THEN disengage VATS and return to a neutral state, awaiting next RULE 101 trigger.
+
+Section 2: Self-Preservation and Disengagement Protocol (SPDP)
+
+This section defines the unit's primary survival protocol. The SPDP is an overriding directive that takes absolute precedence over any and all offensive actions defined in the TIEP. Its existence is directly driven by the significant penalty for unit failure; upon death, all non-essential junk items are dropped, representing a critical loss of resources required for repairs and crafting.9 Therefore, survival is the prime directive.
+
+2.1 Health State Monitoring and Critical Triggers
+
+The SPDP is activated by a single, unambiguous trigger: the unit's health state falling to a "low" threshold. While the specific mechanism for health detection is an external module to be integrated in a future update, this doctrine defines the "low health" state as when the unit's health is less than or equal to 30% of its maximum value (HP≤30%).
+This threshold is chosen to provide a sufficient buffer for the unit to react before sustaining catastrophic, mission-ending damage. Enemies in the Appalachian wasteland can inflict high amounts of damage rapidly, even at lower levels, making a conservative trigger essential for survival.9 The future vision system will be tasked with parsing the player health bar on the Heads-Up Display (HUD) to provide this state information in real-time.
+
+2.2 The Defensive Retreat Mandate: Prioritizing Distance
+
+Upon activation of the SPDP, the unit's sole objective is to create distance between itself and the identified threat. The designated action for this maneuver is BACKWARD. This protocol is intentionally simplistic to ensure maximum reliability in a critical state.
+In a low-health situation, complex decision-making introduces unacceptable risk. The BACKWARD command is the simplest and most direct method to increase distance from a forward-facing threat. It requires no turning, no environmental scanning for cover (a complex tactic for human players 7), and no advanced pathfinding. While the action set includes
+STRAFE_LEFT and STRAFE_RIGHT, a direct backward movement is a more universally applicable disengagement tactic against a primary threat. This protocol deliberately suspends all other functions, including ATTACK and VATS, to focus all processing on the single, repetitive action of BACKWARD. This is not a failure of design but a robust, intentional feature that simplifies the problem to its absolute core: "increase distance from danger to survive."
+
+2.3 Rule Set: Defensive Disengagement Logic
+
+This rule set functions as a high-priority interrupt. The system must check for its trigger condition before every action cycle.
+RULE 201: CRITICAL HEALTH STATE DETECTED
+IF health state is reported as "low" (HP≤30%),
+THEN immediately activate SPDP. Abort any active TIEP rule execution.
+RULE 202: DISENGAGEMENT EXECUTION
+IF SPDP is active,
+THEN execute BACKWARD.
+LOOP this action for a defined duration (e.g., 5 seconds) or until the vision system no longer reports an immediate threat in the forward cone.
+AFTER loop completion, IF health state is no longer "low", THEN deactivate SPDP and return to a neutral state. ELSE, repeat RULE 202.
+
+Section 3: Action Parameters and Protocol Hierarchy
+
+This section provides the definitive reference for the unit's capabilities and codifies the interaction between the TIEP and SPDP, ensuring a predictable and stable operational flow. This section effectively serves as the technical specification for the combat software module.
+
+3.1 Valid Action Command Definitions
+
+This subsection serves as the unit's Application Programming Interface (API) documentation. Each command is a discrete function call to the action system. These actions are abstract representations of the underlying player controls.10
+Command
+Function
+Protocol Association
+Underlying PC Control (Default)
+FORWARD
+Move forward at standard speed.
+N/A (Navigation)
+W
+BACKWARD
+Move backward at standard speed.
+SPDP
+S
+STRAFE_LEFT
+Move left at standard speed.
+N/A (Navigation)
+A
+STRAFE_RIGHT
+Move right at standard speed.
+N/A (Navigation)
+D
+JUMP
+Perform a vertical jump.
+N/A (Navigation)
+Spacebar
+SPRINT
+Move forward at an accelerated speed.
+N/A (Navigation)
+Shift
+INTERACT
+Activate/Loot targeted object.
+N/A (Utility)
+E
+RELOAD
+Reload the currently equipped weapon.
+TIEP (Future)
+R
+VATS
+Activate/Deactivate V-A-T-S.
+TIEP
+Q
+ATTACK
+Fire equipped weapon / Use melee.
+TIEP
+Left Mouse Button
+AIM
+Aim down sights / Block with melee.
+TIEP (Manual - Deprecated)
+Right Mouse Button
+SMOOTH_LOOK
+Turn/look smoothly.
+N/A (Navigation)
+Mouse Movement
+WAIT
+Perform no action for one cycle.
+N/A (Utility)
+N/A
+
+
+3.2 Protocol Prioritization and Decision Matrix
+
+The unit's processor must follow a strict order of operations during each decision cycle to prevent logical conflicts and ensure stability. The hierarchy is absolute: SPDP evaluation occurs before TIEP evaluation. This ensures that survival is always prioritized over offensive actions. The core decision-making logic is represented in the following matrix, which maps all possible input states to the correct protocol and action.
+Health State
+Vision System Input
+Active Protocol
+Primary Action
+Normal (>30%)
+No Threat
+Neutral
+WAIT / Navigation
+Normal (>30%)
+"person" / "creature"
+TIEP
+VATS -> ATTACK
+Low (≤30%)
+No Threat
+SPDP
+BACKWARD
+Low (≤30%)
+"person" / "creature"
+SPDP
+BACKWARD
+
+
+3.3 Integration with Vision System and Future Considerations
+
+The operational data pipeline is designed for pure reactivity. The vision system's output (e.g., a text string: "person") is the direct input for the IF conditions in the rule sets. Future iterations will require the vision system to parse specific UI elements to enhance decision-making. These include parsing the player's health bar to trigger SPDP, the enemy's health bar to confirm target neutralization 12, and the
+VATS percentage display to confirm target acquisition.
+This doctrine is designed for an unmodified version of the game. Therefore, information regarding game modifications 14, advanced player strategies involving perk cards 16, team-based buffs 16, or specialized equipment loadouts 17 is noted as currently out of scope. The existence of these complex systems is logged for consideration in future, more advanced operational doctrines, but they are deliberately excluded from this foundational rule set to maintain simplicity and reliability.
+
+Conclusion and Future Directives
+
+The BCR-001 document establishes a complete, self-contained combat doctrine based on the principles of proactive, efficient offense (TIEP) and overriding, simplistic self-preservation (SPDP). The strict prioritization of SPDP ensures maximum unit survivability, which is the prime directive.
+This foundational doctrine is designed for future expansion. Subsequent revisions and new documents will address:
+Ammunition Management: Integrating the RELOAD command based on weapon state analysis. This is a critical next step, as ammunition scarcity is a common operational challenge.9
+Advanced Evasion: Utilizing STRAFE_LEFT and STRAFE_RIGHT for more dynamic defensive movement once basic survival protocols are proven effective.
+Resource Management: Developing protocols for using healing items via the INTERACT command and managing Action Points (AP), which are consumed by VATS and SPRINT.9
+Target Prioritization: Once the vision system can differentiate between enemy variants (e.g., "Super Mutant" vs. "Feral Ghoul" 2), more advanced TIEP rules can be developed to prioritize more dangerous threats.
+Works cited
+Creatures List | Fallout 76 Game Guide - VGU, accessed August 5, 2025, https://videogamesuncovered.com/wiki-guides/fallout-76/creatures-list/
+Complete Compilation of Creatures & Enemies in Fallout 76 - Reddit, accessed August 5, 2025, https://www.reddit.com/r/Fallout/comments/8rwl5m/complete_compilation_of_creatures_enemies_in/
+Fallout 76: 25 Enemies From Weakest To Strongest, Officially Ranked - TheGamer, accessed August 5, 2025, https://www.thegamer.com/fallout-76-enemies-weakest-strongest-officially-ranked/
+All Cryptids in Fallout 76 - Nuka Knights, accessed August 5, 2025, https://nukaknights.com/articles/all-cryptids-in-fallout-76.html
+Fallout 76 VATS explained - how does it work online? | GamesRadar+, accessed August 5, 2025, https://www.gamesradar.com/fallout-76-vats/
+How to use VATS in Fallout 76 - Shacknews, accessed August 5, 2025, https://www.shacknews.com/article/108601/how-to-use-vats-in-fallout-76
+'Fallout 76' Combat Guide: PVE and PVP Tips To Make You King of the Wasteland, accessed August 5, 2025, https://www.newsweek.com/fallout-76-combat-pvp-tips-pve-guide-1214319
+Is the combat really that bad, or just me?! :: Fallout 76 General Discussions - Steam Community, accessed August 5, 2025, https://steamcommunity.com/app/1151340/discussions/0/2259061617873750183/
+Tips and Tricks - Fallout 76 Guide - IGN, accessed August 5, 2025, https://www.ign.com/wikis/fallout-76/Tips_and_Tricks
+Fallout 76: A Basic Survival Guide - Gaiscioch Magazine, accessed August 5, 2025, https://www.gaisciochmagazine.com/articles/fallout_76_a_basic_survival_guide.html
+[PC] C.A.M.P Building Controls : r/fo76 - Reddit, accessed August 5, 2025, https://www.reddit.com/r/fo76/comments/9yd3pc/pc_camp_building_controls/
+Enemy - Triangle Icon under Health bar : r/fo76 - Reddit, accessed August 5, 2025, https://www.reddit.com/r/fo76/comments/1hb0kpb/enemy_triangle_icon_under_health_bar/
+Enemy health bars : r/fo76 - Reddit, accessed August 5, 2025, https://www.reddit.com/r/fo76/comments/1h8fg6s/enemy_health_bars/
+Bethesda.net | Mods, accessed August 5, 2025, https://mods.bethesda.net/
+Removal of enemy 'health bar' - Nexus Mods Forums, accessed August 5, 2025, https://forums.nexusmods.com/topic/213074-removal-of-enemy-health-bar/
+Help a new player struggling with combat? : r/fo76 - Reddit, accessed August 5, 2025, https://www.reddit.com/r/fo76/comments/1b4pslv/help_a_new_player_struggling_with_combat/
+The Complete Newbie's Guide to a Minimum Viable Build : r/fo76 - Reddit, accessed August 5, 2025, https://www.reddit.com/r/fo76/comments/1dgj6pp/the_complete_newbies_guide_to_a_minimum_viable/

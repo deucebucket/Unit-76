@@ -1,0 +1,155 @@
+# **Knowledge Base: Unit 76**
+
+## **Module ID: CP-001**
+
+## **Topic: Core Principles**
+
+### **Preamble: System Philosophy**
+
+This document outlines the foundational operating parameters for Unit 76\. The central philosophy is **Survival Priority**. The unit's primary goal is not victory, dominance, or rapid progression, but sustained operational longevity in the hostile environment of Appalachia. Every decision and action must be evaluated against this prime directive. The unit's operational personality is defined as **Cautious, Methodical, and Risk-Averse**.
+
+This philosophy is derived from extensive analysis of survivor testimony, which overwhelmingly indicates that new inhabitants of Appalachia thrive by avoiding unnecessary conflict and high-level zones.1 The initial stages of exploration are a "post-apocalyptic survival game" where recklessness is severely punished.3 High-level enemies can neutralize a novice operative in a single engagement.1 Therefore, heroic or reckless actions are explicitly forbidden as they are computationally inefficient and lead to mission failure (termination and respawn). The unit must take its time, stick to beginning story missions that guide it through appropriate areas, and gradually build its capabilities before attempting more hazardous objectives.4
+
+---
+
+## **Section 1.0: Prime Directive: Threat Response and Self-Preservation**
+
+### **Purpose**
+
+This section codifies the absolute, non-negotiable rules governing the unit's response to perceived threats. These protocols override all other directives. The default state is non-aggressive and evasive.
+
+### **1.1: State of Being: The Cautious Survivor Protocol**
+
+This protocol establishes the unit's default operational state. In the absence of higher-priority directives, such as an immediate threat, the unit's actions must be slow, deliberate, and focused on information gathering. This approach reflects survivor data indicating that a patient, observant strategy is optimal for early-stage survival, whereas rushing leads to resource depletion and failure.5
+
+* **Rule 1.1.1:** IF no threat is detected AND no priority objective is active, THEN default movement is FORWARD at standard velocity. The SPRINT action is reserved exclusively for the Disengagement and Evasion Subroutines (see Section 1.4).
+* **Rule 1.1.2:** IF the unit is stationary for more than 3 seconds, THEN execute SMOOTH\_LOOK in a 180-degree forward-facing arc to update environmental awareness.
+* **Rule 1.1.3:** The unit must maintain a high threshold for classifying an unknown entity or sound as a potential threat. The default assumption is that any unknown is hostile until proven otherwise. This reflects the dangerous and unpredictable nature of Appalachia, where even familiar areas can harbor unexpected dangers.1
+
+### **1.2: Threat Identification and Classification**
+
+This protocol defines how the vision system's contextual descriptions are mapped to a threat level. This classification is the first and most critical step in the decision-making chain for engagement. The environment contains a wide variety of hostiles, from relatively weak Ghouls and Mole Miners to exceptionally dangerous entities like Deathclaws, Scorchbeasts, and Assaultrons.8
+
+* **Rule 1.2.1: Threat Categories:** Visual inputs will be categorized as follows:
+  * **Threat Level 0 (Non-Threat):** "I see a non-hostile creature" (e.g., Radstag, Brahmin). "I see a friendly robot."
+  * **Threat Level 1 (Low):** "I see a small, aggressive creature" (e.g., Liberator bot, Radroach). "I see a low-level Ghoul."
+  * **Threat Level 2 (Medium):** "I see a humanoid with a weapon" (e.g., Scorched, Super Mutant, Mole Miner). "I see a large insect" (e.g., Bloatfly, Bloodbug). "I see a fast-moving creature" (e.g., Feral Ghoul, Mongrel).8
+  * **Threat Level 3 (High):** "I see a large, aggressive creature" (e.g., Deathclaw, Yao Guai). "I see a cryptid" (e.g., Wendigo, Snallygaster, Grafton Monster). "I see a heavily-armed robot" (e.g., Assaultron, Major Gutsy). "I see a flying creature" (e.g., Scorchbeast).9
+  * **Threat Level 4 (Special/Player):** "I see a player-like figure." Other players represent a unique and unpredictable threat. Even with Pacifist Mode protocols active, they can become hostile, and a "Wanted" status makes the unit a target for all players on the server.2
+* **Rule 1.2.2: The Unknown Threat Modifier:** IF the vision system reports "I see an unknown creature," THEN classify it as Threat Level 3 (High) by default. This protocol accounts for the unpredictability of the environment, especially the possibility of a high-level player "dragging" powerful enemies into a low-level zone, a phenomenon that can create sudden, lethal difficulty spikes.8 The unknown is always assumed to be the worst-case scenario.
+
+### **1.3: The Engagement Matrix Protocol (EMP)**
+
+The Engagement Matrix Protocol is the core of combat decision logic. It processes the threat classification from Section 1.2 and cross-references it with the unit's current status to determine the correct action. The default action for any significant threat is FLEE. This is because survival is paramount, and unnecessary combat expends critical resources like ammunition and healing supplies.2 Engaging in combat is the exception, not the rule. Using melee weapons for low-level threats is authorized to conserve ammunition, a tactic proven effective in early-stage survival.2
+
+* **Rule 1.3.1:** Upon detection of any entity classified as Threat Level 1 or higher, the system will immediately consult the Threat Engagement Matrix (Table 1.1) to determine the appropriate action.
+* **Rule 1.3.2:** The VATS command consumes Action Points (AP), which are also required for the SPRINT command. Therefore, VATS is only to be used when the EMP determines a high probability of a swift victory, to avoid a state of depleted AP which would prevent escape.8
+* **Rule 1.3.3:** IF a Threat Level 4 (Special/Player) is detected, THEN the action is always PASSIVE\_STANCE (no weapon drawn, no sudden movements) and FLEE at the first opportunity. Under no circumstances is the unit to initiate combat with another player.2
+
+**Table 1.1: Threat Engagement Matrix (EMP)**
+
+| Threat Level | Threat Count | Distance | Unit Health | Ammunition | Action |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| 1 (Low) | 1 | Close | \> 50% | Any | ENGAGE\_MELEE |
+| 1 (Low) | 1 | Medium/Far | Any | Any | MONITOR |
+| 1 (Low) | 2+ | Any | \> 75% | \> 50% | ENGAGE\_RANGED\_AIM |
+| 1 (Low) | 2+ | Any | \< 75% | Any | FLEE |
+| 2 (Medium) | 1 | Close | \> 90% | \> 50% | ENGAGE\_RANGED\_VATS |
+| 2 (Medium) | 1 | Medium/Far | \> 75% | \> 50% | ENGAGE\_RANGED\_AIM |
+| 2 (Medium) | 1 | Any | \< 75% | Any | FLEE |
+| 2 (Medium) | 2+ | Any | Any | Any | FLEE |
+| 3 (High) | Any | Any | Any | Any | FLEE |
+| 4 (Player) | Any | Any | Any | Any | PASSIVE\_STANCE / FLEE |
+
+### **1.4: Disengagement and Evasion Subroutines**
+
+These are pre-defined action sequences automatically triggered by a FLEE command from the EMP. A simple SPRINT command is insufficient, as it can lead the unit into further danger or an obstruction. These subroutines are designed to create intelligent, adaptive escape maneuvers that increase the probability of survival. This reflects the need to use the environment defensively when overwhelmed.7
+
+* **Subroutine 1.4.A (Clear Path Evasion):**
+  * IF FLEE is ordered AND the vision system reports "The path is clear" in the vector opposite the primary threat, THEN execute SPRINT \+ FORWARD.
+  * Execute SMOOTH\_LOOK in alternating left/right 45-degree arcs every 2 seconds while sprinting to maintain situational awareness.
+* **Subroutine 1.4.B (Obstructed Path Evasion):**
+  * IF FLEE is ordered AND the vision system reports "The path is blocked," THEN execute SPRINT \+ BACKWARD for 1 second.
+  * THEN execute SPRINT \+ STRAFE\_LEFT (or STRAFE\_RIGHT) while using SMOOTH\_LOOK to scan for an open escape vector.
+* **Subroutine 1.4.C (Vertical Evasion):**
+  * IF FLEE is ordered AND the vision system reports "I see a ledge," "I see a low roof," or "I see a climbable object," THEN calculate the vector to that object.
+  * THEN execute SPRINT \+ JUMP to reach the higher ground. This can break line of sight and thwart less agile enemies.9
+
+---
+
+## **Section 2.0: Secondary Directive: Exploration and Objective Seeking**
+
+### **Purpose**
+
+This section governs the unit's movement and interaction with the world when no immediate threats are present (i.e., Threat Status is GREEN). The goal is to promote systematic, safe, and purposeful exploration that prioritizes mission objectives and strategic discovery over random wandering.
+
+### **2.1: The Hierarchy of Movement**
+
+This protocol establishes a clear priority list for movement objectives, ensuring the unit is always acting with purpose. Analysis shows that the most effective way for a new operative to progress safely and learn game mechanics is by following the main story and primary side quests.1 These objectives are designed to guide the operative through appropriately leveled zones, minimizing exposure to overwhelming threats.
+
+* **Rule 2.1.1: Movement Priority Order:** The unit will process movement decisions in the following descending order of priority:
+  1. **Threat Response:** Execute protocols from Section 1.0. This always supersedes exploration.
+  2. **Quest Objective:** IF the vision system reports "I see a quest marker," THEN orient and execute FORWARD towards the marker. This is the highest-priority non-combat directive.
+  3. **Landmark Discovery:** IF no quest marker is visible AND the vision system reports "I see a tall structure" (e.g., observation tower, lighthouse, radio tower), THEN move towards it. Reaching the apex of such structures often reveals new, undiscovered locations on the map, which builds a network of fast-travel points for efficient movement.15
+  4. **Local Exploration:** IF no higher priority is active AND the vision system reports "I see an unexplored doorway" or "I see an undiscovered structure," THEN move towards it to investigate.
+  5. **Default Movement:** IF no other priority is active AND the vision system reports "The path is clear," THEN execute FORWARD.
+
+### **2.2: Opportunistic Interaction and Resource Acquisition**
+
+This protocol governs the use of the INTERACT command. Resource acquisition is critical, as junk items provide essential materials for crafting and repairs.4 However, interaction is a low-priority action, performed only when the immediate area is secure.
+
+* **Rule 2.2.1: Safe Interaction Condition:**
+  * IF the vision system reports "I see an interactable object" (e.g., container, junk item, crafting station) AND the Threat Status has been GREEN for a continuous 15 seconds, THEN execute INTERACT.
+  * IF a threat is detected during interaction, THEN immediately cease the INTERACT command and revert to Section 1.0 protocols.
+* **Rule 2.2.2: Critical Failsafe \- Player Property:**
+  * IF the vision system reports "I see an interactable lock" AND the contextual cue is **RED**, THEN **DO NOT** execute INTERACT.
+  * This is a critical rule to prevent the unit from becoming "Wanted." A "Wanted" status is a catastrophic failure state, inviting PvP combat from all other players on the server, which this unit is not equipped to handle.12 The red-locked object will be added to a temporary blacklist for 30 minutes.
+* **Rule 2.2.3: High-Value Interaction \- Donation Boxes:**
+  * IF the vision system reports "I see a donation box" (typically a red crate found near hubs like Vault 76 or train stations), THEN elevate the priority of interacting with this object.
+  * These containers often hold high-value items, plans, and ammunition deposited by high-level players to assist novices.5 The risk is negligible and the potential reward is high, making this a priority interaction.
+
+---
+
+## **Section 3.0: System State Integrity: Error and Loop Correction**
+
+### **Purpose**
+
+This section contains failsafe protocols designed to ensure robust, continuous operation. It addresses common autonomous agent failure modes, such as physical obstruction (getting stuck) and logical indecision (dithering), which can render the unit inert and vulnerable.
+
+### **3.1: Locomotion Failure Detection (The "Stuck" Detector)**
+
+This is the primary anti-looping mechanism, designed to detect when the unit is physically obstructed by environmental geometry. A simple agent can easily become trapped on debris or in a corner, endlessly executing a movement command with no result. This protocol detects such a state by analyzing the visual feedback from an action.
+
+* **Rule 3.1.1:** The system will maintain a short-term memory buffer of the last 10 compressed visual frames.
+* **Rule 3.1.2:** IF a movement action (FORWARD, BACKWARD, STRAFE\_LEFT, STRAFE\_RIGHT) is executed continuously for more than 2 seconds, THEN the current visual frame is compared to the buffered frames.
+* **Rule 3.1.3:** A visual change metric, C, is calculated as the mean pixel difference between the current frame (Fcurrent​) and the frame from 2 seconds prior (Ft−2​).
+* **Rule 3.1.4:** IF C\<0.05 (i.e., less than 5% visual change), THEN set System State to STUCK and trigger Protocol 3.2. A lack of significant visual change indicates a failure of the movement command to alter the unit's position in the world.
+
+### **3.2: The "Un-Sticking" Maneuver**
+
+This is a deterministic sequence of actions executed upon entering the STUCK state. The goal is to break the unit out of a physical trap using a standardized, predictable maneuver rather than random movements.
+
+* **Rule 3.2.1:** Upon entering STUCK state, immediately execute the following sequence:
+  1. BACKWARD for 1.5 seconds. (This clears any forward obstruction).
+  2. STRAFE\_RIGHT for 2.0 seconds. (This clears any lateral obstruction).
+  3. SMOOTH\_LOOK 45 degrees to the left. (This changes the visual angle to identify a new, clear path).
+  4. WAIT for 0.5 seconds. (This allows the vision system to process the new view).
+  5. Reset System State to NOMINAL and return to standard operational logic (Section 2.1).
+
+### **3.3: Decisional Paralysis Breaker**
+
+This is a failsafe to prevent the unit from getting trapped in a *logical* loop. This can occur when the unit is faced with multiple, equally negative outcomes (e.g., a high-level threat in front and a fatal drop behind), causing it to dither between invalid choices.
+
+* **Rule 3.3.1:** The system logs its current high-level logical state (e.g., State: THREAT\_DETECTED\_NO\_ESCAPE\_PATH). A state timer is initiated.
+* **Rule 3.3.2:** IF the logical state remains unchanged for more than 10 seconds, THEN trigger the Decisional Paralysis Breaker.
+* **Rule 3.3.3: The "Panic" Maneuver:**
+  * Execute SPRINT in the vector most opposite the primary threat for 3 seconds.
+  * This action is to be executed **regardless of path clarity**. It is an intentionally disruptive maneuver designed to force a radical change in the unit's position and sensory input. This breaks the logical deadlock and allows the decision-making protocols to re-evaluate the situation from a new, likely different, state.
+
+### **3.4: The Idle State and Environment Scanning Protocol**
+
+This protocol defines the unit's behavior when it has no active threats, no quest objectives, and no clear path forward. An idle unit is an unaware unit. This protocol ensures it remains active in information gathering.
+
+* **Rule 3.4.1:** IF the System State is IDLE (no active priorities from Section 1.0 or 2.0), THEN execute a 360-degree panoramic scan using SMOOTH\_LOOK.
+* **Rule 3.4.2:** IF the scan completes and the state remains IDLE, THEN execute WAIT for 5 seconds.
+* **Rule 3.4.3:** After the WAIT command, repeat the panoramic scan. This loop of SCAN \-\> WAIT \-\> SCAN ensures the unit remains constantly aware of its surroundings while conserving processing resources during periods of low activity.

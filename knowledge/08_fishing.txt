@@ -1,0 +1,205 @@
+# **Knowledge Base: Fishing Protocol**
+
+This document provides the complete operational instruction set for the "Fishing" activity within the *Fallout 76* simulation. The protocols herein are designed to be parsed and executed by an autonomous agent with the specified vision and action systems. The objective is to progress from novice capability to expert-level proficiency, defined by the ability to successfully acquire the rarest aquatic specimens.
+
+## **Section 1.0: System State Prerequisites and Initialization**
+
+This section details the mandatory, one-time protocols required to enable the fishing functionality. Execution of these protocols is the highest priority if the system state fishing.unlocked is FALSE. Successful engagement in any fishing activity is contingent upon the completion of these initial steps.
+
+### **Protocol 1.1: Pre-computation and State Verification**
+
+Before initiating any fishing-related actions, the system must verify two critical states. Failure to confirm these states will result in an inability to perform subsequent fishing protocols.
+
+* **Rule 1.1.1:** IF vision\_system reports "Power Armor HUD is active", THEN update state.is\_in\_power\_armor \= TRUE. ELSE, update state.is\_in\_power\_armor \= FALSE.
+* **Rule 1.1.2:** IF state.is\_in\_power\_armor \== TRUE, THEN execute command: INTERACT (hold) to initiate Power Armor exit sequence. Execute command: WAIT (5). Re-run Rule 1.1.1 to verify state change.
+  * **Operational Context:** The fishing action is mechanically disabled for any agent currently operating within Power Armor.1 This check is a fundamental prerequisite to prevent action failure. It must be executed and return
+    FALSE before any attempt to fish is made.
+* **Rule 1.1.3:** Execute Protocol 2.1 (Target Acquisition and Positioning). IF vision\_system reports text "prompt: Fish" when targeting a valid water body, THEN update state.fishing\_unlocked \= TRUE. Abort this section and proceed to Section 2.0. ELSE, update state.fishing\_unlocked \= FALSE. Proceed to Protocol 1.2.
+
+### **Protocol 1.2: Unlocking Fishing Capability (Quest: "Casting Off")**
+
+This protocol outlines the linear sequence of actions required to complete the "Casting Off" quest. This quest is the sole gating mechanism for all fishing activities; the fishing mechanic is not innately available and must be unlocked through this process.2
+
+#### **Sub-protocol 1.2.1: Quest Initiation**
+
+The quest can be reliably initiated by traveling to the required geographical region, which triggers a radio signal.
+
+* **Rule:** IF quest\_log does not contain "Casting Off", THEN execute command: OPEN\_MAP. Execute command: MOVE\_CURSOR to map area designated "The Mire". Execute command: CONFIRM\_SELECTION (Fast Travel). Upon arrival, monitor for quest update.
+  * **Operational Context:** Entering The Mire region is a reliable trigger for the "Casting Off" quest to begin, often presenting the objective "Listen to the Linda-Lee Shortwave Signal".1
+
+#### **Sub-protocol 1.2.2: Navigation to Fisherman's Rest**
+
+The quest provides explicit navigational waypoints that must be followed.
+
+* **Rule:** IF objective text reads "Listen to the Linda-Lee Shortwave Signal", THEN execute sub-routine: Pip-Boy Navigation (Target Menu: Radio, Target Item: Linda-Lee Shortwave Signal).
+* **Rule:** IF objective text reads "Investigate Fisherman's Rest", THEN execute command: OPEN\_MAP. Execute command: MOVE\_CURSOR to map marker labeled "Fisherman's Rest". Execute command: CONFIRM\_SELECTION (Set Waypoint). Execute command: CLOSE\_MAP. Execute sub-routine: Navigate to Waypoint.
+  * **Operational Context:** Fisherman's Rest is a new location situated in the eastern part of Appalachia, near the Valley Galleria.2 Once discovered, this location becomes a free fast-travel point, which should be logged for future use.6
+
+#### **Sub-protocol 1.2.3: NPC Interaction Sequence**
+
+The quest requires interaction with specific Non-Player Characters (NPCs) at Fisherman's Rest.
+
+* **Rule:** IF objective text reads "Speak to the Mysterious Figure" OR "Speak to the Other Stranger" OR "Speak to Captain Raymond Clark", THEN execute sub-routine: Locate and INTERACT with NPC whose vision\_system label matches objective text. Primary targets are "The Fisherman" and "Captain Raymond Clark".2
+
+#### **Sub-protocol 1.2.4: First Catch**
+
+This objective serves as the in-game tutorial for the fishing mechanic and is the first operational test of the core fishing protocol.
+
+* **Rule:** IF objective text reads "Catch Fish (0/3)", THEN execute Section 2.0 (Standard Fishing Protocol) until internal variable fish\_caught\_count \>= 3\. Proceed to Sub-protocol 1.2.5.
+  * **Operational Context:** To complete this step, the agent will be given a basic fishing rod and some Common Bait.3 This marks the point where the fishing ability is functionally enabled.
+
+#### **Sub-protocol 1.2.5: Quest Completion**
+
+The final steps of the quest involve basic crafting and interaction tasks.
+
+* **Rule 1.2.5.1:** IF objective text reads "Turn the fish into Fish Bits at a Cooking Station", THEN locate nearest object with label "Cooking Station" and execute command: INTERACT. Navigate menu interface to locate and craft item "Fish Bits".\[4\]
+* **Rule 1.2.5.2:** IF objective text reads "Feed the Fish Bits to Linda-Lee", THEN locate entity with label "Linda-Lee" and execute command: INTERACT.\[4\]
+* **Rule 1.2.5.3:** IF objective text reads "Report back to Captain Raymond", THEN locate and execute command: INTERACT with NPC labeled "Captain Raymond Clark".\[4\]
+* **Rule 1.2.5.4:** Upon completion of Rule 1.2.5.3, update state.fishing\_unlocked \= TRUE.
+
+## **Section 2.0: Standard Fishing Protocol (SFP)**
+
+This section details the primary, repeatable loop for a single fishing attempt. This is the agent's default fishing behavior once state.fishing\_unlocked is TRUE.
+
+### **Protocol 2.1: Target Acquisition and Positioning**
+
+This protocol defines the process of identifying a valid fishing location and positioning the agent for interaction.
+
+* **Rule 2.1.1:** Execute sub-routine: Navigate to a known water body. Prioritize locations from Table 4.2 based on current objectives.
+* **Rule 2.1.2:** Execute commands: FORWARD, BACKWARD, STRAFE\_LEFT, STRAFE\_RIGHT to approach the water's edge.
+* **Rule 2.1.3:** Execute command: SMOOTH\_LOOK to direct the agent's reticle onto the water surface.
+* **Rule 2.1.4:** IF vision\_system reports text "prompt: Fish" is visible and not grayed out, THEN proceed to Protocol 2.2. ELSE, adjust position using FORWARD, BACKWARD, or STRAFE commands and repeat Rule 2.1.3.
+  * **Operational Context:** While a general rule is that fishing is possible in any water deep enough to swim in, this is not universally reliable.7 The appearance of the "Fish" interaction prompt is the only definitive indicator of a valid fishing spot. The agent must loop through minor position and camera angle adjustments until this prompt is confirmed.1
+
+### **Protocol 2.2: Line Casting and Bite Detection**
+
+This protocol governs the first phase of the fishing minigame, focusing on casting the line and reacting to a successful bite. This is a time-critical process.
+
+#### **Sub-protocol 2.2.1: Casting**
+
+* **Rule:** IF "prompt: Fish" is active, THEN execute command: INTERACT. Update system state to 'awaiting\_bite'.
+  * **Operational Context:** A single INTERACT command initiates the cast and begins the waiting phase.2
+
+#### **Sub-protocol 2.2.2: Bite Detection Loop**
+
+This is the core reaction test of the fishing activity. Accurate identification of the correct visual and auditory cues is critical for success.
+
+* **Rule 2.2.2.1 (The Nibble):** IF vision\_system reports "bobber dips slightly" OR "bobber bounces on water surface", THEN execute command: WAIT. Maintain state 'awaiting\_bite'.
+  * **Operational Context:** The bobber will often make several small, preliminary movements. These are "nibbles" and must be ignored. Reacting to these false positives will cancel the cast and waste time.10
+* **Rule 2.2.2.2 (The Bite):** IF vision\_system reports "bobber is pulled completely under water" AND "large splash visual effect is generated at bobber location", THEN immediately execute command: INTERACT. Priority: High. Reaction Time: Critical. Update system state to 'reeling\_fish'. Proceed to Section 3.0.
+  * **Operational Context:** A successful hook is signaled by a distinct and vigorous event, not a simple splash. The bobber is pulled entirely beneath the water's surface, accompanied by a significant splash and a unique sound cue.3 The system must be programmed to react to this compound trigger—the combination of bobber submersion and a large splash—to ensure the highest probability of a successful hook. The reaction time must be minimal to avoid losing the fish.
+
+## **Section 3.0: Advanced Fishing Protocol (AFP)**
+
+This section provides the protocols for the second phase of the minigame and the optimization strategies required for achieving mastery. These protocols are essential for acquiring rare and legendary fish, which are mechanically impossible to catch without these advanced techniques and equipment upgrades.
+
+### **Protocol 3.1: Reeling Sub-routine**
+
+This protocol governs the tracking-based minigame that begins immediately after a successful hook (Rule 2.2.2.2).
+
+* **Rule 3.1.1:** IF system state is 'reeling\_fish', THEN monitor vision\_system for the appearance of the "reeling GUI".
+* **Rule 3.1.2:** The "reeling GUI" is defined as a circular, "radar-like icon" that appears on the screen, containing a "cone" or "beam" of light and a "fish icon".3
+* **Rule 3.1.3:** IF vision\_system reports "fish icon is inside cone", THEN execute command: WAIT. Maintain current state.
+* **Rule 3.1.4:** IF vision\_system reports "fish icon is moving to the left of the cone's boundary", THEN execute command: STRAFE\_LEFT to rotate the cone counter-clockwise.
+* **Rule 3.1.5:** IF vision\_system reports "fish icon is moving to the right of the cone's boundary", THEN execute command: STRAFE\_RIGHT to rotate the cone clockwise.
+  * **Operational Context:** The objective of this minigame is to constantly keep the moving fish icon within the boundaries of the rotating cone.10 The
+    STRAFE\_LEFT and STRAFE\_RIGHT commands are the inputs used to control the cone's rotation.9 The difficulty is determined by the fish's speed and the rod's stats (Line Strength, Rotation Speed).
+* **Rule 3.1.6:** IF vision\_system reports "fish icon has reached the center of the GUI", THEN the catch is successful. Log the caught item. Reset system state to idle.
+
+### **Protocol 3.2: Consumable Resource Management (Bait)**
+
+Expert proficiency requires the strategic acquisition and deployment of different bait types. Using the wrong bait is a significant waste of resources.
+
+#### **Sub-protocol 3.2.1: Bait Acquisition**
+
+* **Rule (Common Bait):** IF inventory count of "Common Bait" \< 20, THEN navigate to Fisherman's Rest. Locate NPC "Captain Raymond Clark" or "The Fisherman". Execute command: INTERACT, then navigate menu to purchase "Common Bait".2
+* **Rule (Improved Bait):** Set a high priority for completing "Public Events" and the daily quest "Big Fish in a small Pond". These activities are the primary acquisition sources for "Improved Bait".\[2, 11\]
+* **Rule (Superb Bait):** Monitor "Season" progression. "Superb Bait" is primarily acquired as a seasonal reward.\[11, 12\]
+
+#### **Sub-protocol 3.2.2: Bait Selection Heuristic**
+
+This heuristic links bait choice directly to the agent's current objective and equipment state to maximize efficiency and prevent resource loss.
+
+* **Rule:** IF objective is "catch common fish" OR "farm Fish Bits", THEN select "Common Bait".
+* **Rule:** IF objective is "catch uncommon fish" OR "catch specific regional fish" AND current rod\_mods include "Mk2 Reel" or better (see Table 4.3), THEN select "Improved Bait".
+* **Rule:** IF objective is "catch Local Legend" OR "catch Axolotl" AND current rod\_mods include "Mk4 Reel" and "Advanced Drag" (see Table 4.3), THEN select "Superb Bait".
+* **Rule (Critical):** IF a high-tier bait ("Improved" or "Superb") is selected BUT the required rod modifications are not equipped, THEN abort selection and revert to "Common Bait".
+  * **Operational Context:** Attempting to catch rare fish with high-quality bait but an un-upgraded rod is an exercise in futility. The fish will be too fast for the reeling minigame, and the bait will be lost.6 This critical check ensures that valuable resources are preserved until the agent's hardware is sufficient for the task.
+
+### **Protocol 3.3: Equipment Enhancement**
+
+Progression is not purely skill-based; it is heavily gated by equipment. Mastery is impossible without systematically upgrading the fishing rod. This creates a necessary progression loop: fish with basic gear to earn the right to craft advanced gear.
+
+* **Rule 3.3.1:** Set a persistent background objective to complete all available "Fishing" challenges listed in the "Challenges" menu. These are the source for "Reel" modification plans (Mk1 through Mk4).12
+* **Rule 3.3.2:** Prioritize daily completion of the "Big Fish in a small Pond" quest. This quest has a chance to reward "Hook" modification plans, including the critical "Advanced Drag" plan.\[6, 13\]
+* **Rule 3.3.3:** IF a new fishing modification plan is acquired, THEN navigate to the nearest "Tinker's Workbench". Execute command: INTERACT. Navigate menu interface: Modify \-\> Fishing Rod. Apply the highest-tier available modifications for each slot.
+  * **Operational Context:** The Tinker's Workbench is the only location where rod modifications can be applied.6 The progression from the standard rod to a fully modified Mk4 rod is the primary path to being able to complete the reeling minigame for the game's rarest fish.13
+
+## **Section 4.0: Heuristic Data Tables**
+
+This section contains structured data for the agent's decision-making algorithms, enabling optimized, data-driven behavior.
+
+### **Table 4.1: Bait Effectiveness Matrix**
+
+This table correlates bait type with the probability of hooking different categories of fish. This data is critical for executing Protocol 3.2.2.
+
+| Bait Type | Uncommon Region Fish Chance | Glowing Fish Chance | Local Legend Chance | Axolotl Chance | Source |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| Common Bait | 5% | 1% | 1% | 0% | 12 |
+| Improved Bait | N/A | N/A | N/A | N/A | 12 |
+| Superb Bait | 80% | 12% | 15% | 21% | 12 |
+
+Note: Data for Improved Bait probabilities is not available in the provided documentation, but it is established to be superior to Common and inferior to Superb bait.3
+
+### **Table 4.2: Regional Fish and Location Directory**
+
+This table maps specific fish categories to the regions or exact locations where they can be caught. This is essential for completing location-based challenges and hunting specific specimens.
+
+| Region | Example Fishing Locations | Notable Regional Catches | Source |
+| :---- | :---- | :---- | :---- |
+| The Forest | Rivers near Vault 76, Ohio River | Timber Sawgill, Forest Lunker | 7 |
+| Ash Heap | Pond at Brim Quarry, Lake Reynolds | Sooty Sawgill, Ash Heap Lunker | 7 |
+| Toxic Valley | River north of Grafton Station, Toxic Dried Lakebed | Noxious Sawgill, Toxic Valley Lunker | 7 |
+| Savage Divide | Spruce Knob Lake, Solomon's Pond | Alpine Sawgill, Savage Divide Lunker | 7 |
+| The Mire | Fisherman's Rest, Crevasse Dam | Muddy Sawgill, Mire Lunker | 7 |
+| Cranberry Bog | Quarry X3, Canal west of Watoga Station | Bog Sawgill, Cranberry Bog Lunker | 7 |
+| Skyline Valley | Three Ponds, Lake at Rapidan Camp | Static Sawgill, Skyline Valley Lunker | 7 |
+| Specific | Wavy Willard's Water Park | Local Legend "Wavy Willard" | 12 |
+| Specific | Organ Cave | Local Legend "Organ Grinder" | 12 |
+| Specific | Big Maw | Local Legend "Ryl-Tkannoth, Maw-Begotten" | 12 |
+
+### **Table 4.3: Fishing Rod Modification Effects**
+
+This table details the specific statistical effect of key fishing rod modifications. This data informs the equipment enhancement priority (Protocol 3.3).
+
+| Modification Name | Type | Effect Description | Statistical Change | Source |
+| :---- | :---- | :---- | :---- | :---- |
+| Mark 1 Reel | Reel | Improves cone rotation speed. | \+Rotation Speed | 6 |
+| Mark 2 Reel | Reel | Adds line strength, making fish escape slower. | \+Line Strength | 6 |
+| Mark 3 Reel | Reel | Significant improvement for all but legendary fish. | \++All Stats | 12 |
+| Mark 4 Reel | Reel | Required for legendary fish. | \+++All Stats | 13 |
+| Attractive Hook | Hook | Increases chance of a bite. | \+25% Catch Speed | 12 |
+| Improved Bearings | Hook | Increases reeling speed. | \+25% Reel in Speed | 12 |
+| Steady Handle | Hook | Increases cone size at the cost of rotation speed. | \+25% Catch Zone, \-25% Rotation Speed | 12 |
+| Advanced Drag | Hook | High-tier, highly effective mod for reeling. | Significantly improves reeling success. | 13 |
+
+## **Section 5.0: Utility and Optimization Protocols**
+
+This section covers secondary loops and minor optimizations that contribute to overall efficiency and reward generation.
+
+### **Protocol 5.1: Reward Loop (Linda-Lee)**
+
+This protocol defines the process for converting low-value fish into a chance for high-value legendary items.
+
+* **Rule 5.1.1:** IF inventory contains fish AND objective is "acquire legendary items" OR "acquire scrip", THEN execute Protocol 1.2.5.1 (craft Fish Bits).
+* **Rule 5.1.2:** Navigate to Fisherman's Rest. Locate entity "Linda-Lee".
+* **Rule 5.1.3:** IF vision\_system reports Linda-Lee is "hungry", THEN execute command: INTERACT. In the transfer menu, deposit exactly 25 "Fish Bits". Repeat until inventory of Fish Bits is depleted or Linda-Lee is no longer hungry.
+  * **Operational Context:** Analysis indicates that feeding the giant hermit crab Linda-Lee in precise increments of 25 Fish Bits is the optimal method for generating legendary item rewards.2 Deviating from this quantity is sub-optimal.
+
+### **Protocol 5.2: Self-Buffing**
+
+This protocol uses fishing byproducts to create a positive feedback loop, enhancing future fishing performance.
+
+* **Rule 5.2.1:** IF a fishing session of extended duration (\>20 minutes) is planned, THEN navigate to a Cooking Station and craft "Grilled Fish". Required components: Fish, Salt.
+* **Rule 5.2.2:** Consume one "Grilled Fish" from inventory.
+  * **Operational Context:** The "Grilled Fish" food item provides a 20-minute buff that reduces the time to hook a fish, effectively decreasing the number of preliminary "nibbles" before a real bite.9 For any significant fishing session, this is a tangible time-saving optimization that increases the overall rate of catches per hour.

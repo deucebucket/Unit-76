@@ -1,0 +1,171 @@
+# **Knowledge Base: KB-76-PE-001 \- Public Event Participation Protocol**
+
+## **1.0 Directive Overview**
+
+### **1.1 Purpose**
+
+This document defines the logical framework and command sequences for the autonomous unit to detect, navigate to, and participate in *Fallout 76* "Public Events." The primary objective is to maximize the acquisition of experience points, legendary items, and other rewards, thereby accelerating the unit's progress toward "expert" status.
+
+### **1.2 Scope**
+
+This protocol covers the end-to-end process from event detection to post-event state reset. It is designed for a system with specified vision/OCR capabilities and a restricted set of valid actions. All instructions are to be interpreted as literal, rule-based logic for machine execution.
+
+### **1.3 Key Terminology**
+
+* **Public Event:** A server-wide, timed mission accessible to all players, typically involving cooperative objectives and marked by a unique map icon.1 These events are a primary source of high-value rewards.
+* **Hostile Target:** Any entity identified by the vision system as an enemy and which can be targeted by the VATS command.
+* **Friendly/Objective NPC:** A non-hostile entity that is a focal point of an event objective. Examples include the "Scavengers" in the *Radiation Rumble* event or the "Rad Scrubber" in the *Eviction Notice* event. Protecting these entities is often a primary or secondary objective.
+* **State:** The current operational mode of the unit. Defined states include IDLE, DETECTING\_EVENT, NAVIGATING, and ENGAGING.
+
+### **Table 1-1: Action Command Definitions**
+
+This table provides an unambiguous operational dictionary for all valid system commands. Clarity in command execution is paramount to prevent logical faults and ensure mission success.
+
+| Command | Definition |
+| :---- | :---- |
+| FORWARD | Initiate continuous forward locomotion until another movement command is issued or an obstacle is detected. |
+| BACKWARD | Initiate continuous backward locomotion until another movement command is issued or an obstacle is detected. |
+| STRAFE\_LEFT | Initiate continuous lateral locomotion to the left until another movement command is issued or an obstacle is detected. |
+| STRAFE\_RIGHT | Initiate continuous lateral locomotion to the right until another movement command is issued or an obstacle is detected. |
+| JUMP | Execute a single vertical jump. |
+| SPRINT | Initiate accelerated forward locomotion. This action consumes Action Points (AP). |
+| INTERACT | Execute the primary contextual action on the object currently in the central reticle's focus (e.g., pick up item, open door, activate terminal, repair object). |
+| RELOAD | Execute the weapon reload sequence if the current weapon's magazine is not full and ammunition is available. |
+| VATS | Activate the Vault-Tec Assisted Targeting System. This action cycles through available hostile targets within range and line of sight. |
+| ATTACK | Discharge the currently equipped weapon at the targeted entity or location. |
+| AIM | Engage the weapon's sights for improved accuracy. |
+| SMOOTH\_LOOK | Initiate a smooth pan of the camera view. Requires directional parameters. |
+| WAIT | Cease all actions and remain stationary for a specified duration. |
+| OPEN\_MAP | Access the full-screen world map interface. |
+| CLOSE\_MAP | Exit the full-screen world map interface. |
+| MOVE\_CURSOR | Manipulate the on-screen cursor position when an interface (e.g., Map, Menu) is active. Requires directional parameters (UP, DOWN, LEFT, RIGHT). |
+| CONFIRM\_SELECTION | Execute the currently highlighted command or option within an active interface. |
+
+## **2.0 Event Detection Protocol (EDP)**
+
+### **2.1 Protocol Objective**
+
+To reliably identify an active Public Event and designate it as the primary operational target. This protocol operates continuously in the background while the unit is in an IDLE or EXPLORING state.
+
+### **2.2 Primary Detection Method: Proactive Timed Scanning**
+
+Analysis of operational data indicates that relying solely on reactive on-screen notifications is suboptimal. These visual cues can be missed if the unit is engaged with a menu interface, may fail to render, or fade from the screen too quickly to be processed by OCR. Conversely, game mechanics dictate that major Public Events initiate on a predictable, fixed schedule: at the top of the hour, 20 minutes past the hour, and 40 minutes past the hour. An expert system leverages this predictability. Therefore, the primary detection method is a proactive scan of the map, synchronized with the known event schedule. This shifts the unit's posture from passive reaction to proactive anticipation, significantly increasing the probability of event detection.
+
+### **2.3 Sub-Protocol 2.3.1: Proactive Timed Scan (Primary)**
+
+This is the default sub-protocol for identifying new events.
+
+1. IF the internal system clock reads HH:00, HH:20, or HH:40, THEN execute OPEN\_MAP.
+2. IF the map interface is active, THEN activate the vision system to scan for the Public Event Icon (refer to Table 2-1).
+3. IF a Public Event Icon is detected, THEN change state to NAVIGATING and proceed to **Section 3.0: Event Navigation Protocol (ENP)**.
+4. IF no Public Event Icon is detected after 5 seconds of scanning, THEN execute CLOSE\_MAP and return to the IDLE state.
+
+### **2.4 Sub-Protocol 2.3.2: Reactive OCR Scan (Secondary)**
+
+This sub-protocol serves as an opportunistic backup to the primary timed scan.
+
+1. IF the vision system's continuous HUD scan detects text strings containing "Event:" or "Public Event" in the top-left or top-right display regions, THEN immediately execute OPEN\_MAP.
+2. IF the map interface is active, THEN proceed with steps 2-4 of **Sub-Protocol 2.3.1**.
+
+### **Table 2-1: Visual Cue Reference Matrix**
+
+This matrix provides the vision system with the necessary parameters to identify valid event targets. Accurate identification is crucial to differentiate event markers from other map icons, such as player camps or standard quest objectives.
+
+| Cue Type | Description | Associated Symbol | Location | Priority |
+| :---- | :---- | :---- | :---- | :---- |
+| Map Icon | A yellow, hexagonal shape.1 | Often contains a white exclamation mark (\!) symbol. | World Map | **High**. This is the primary navigation target. |
+| On-Screen Notification | OCR string containing "Event:" or "Join Public Event" followed by the event name. | N/A | Top-left or top-right of the HUD. | **Medium**. This is a trigger to open the map, not a direct target. |
+
+## **3.0 Event Navigation Protocol (ENP)**
+
+### **3.1 Protocol Objective**
+
+To execute an efficient and resource-free fast travel sequence to the identified Public Event location.
+
+### **3.2 Strategic Navigation: The "Net Positive Travel" Heuristic**
+
+Standard fast travel between discovered locations incurs a variable cost in Caps, the in-game currency. However, fast travel to an active Public Event is always free of charge. This mechanic presents a significant strategic advantage that an expert system must exploit. Any active Public Event, regardless of its intrinsic reward value, offers a "travel subsidy." This allows the unit to traverse the map at no cost, effectively using a distant event as a free transport to a desired region for future operations. Therefore, the governing logic is to attempt travel to *any* detected Public Event, as the act of travel itself represents a net positive gain in either saved resources or strategic repositioning.
+
+### **3.3 Sub-Protocol 3.3.1: Map Interaction Sequence**
+
+This sequence is initiated once the unit enters the NAVIGATING state with the map interface open.
+
+1. IF State is NAVIGATING, THEN execute MOVE\_CURSOR commands until the cursor is positioned directly over the identified Public Event Icon.
+2. IF the cursor is on the icon, THEN activate OCR to read the pop-up text box that appears.
+3. IF OCR confirms the text contains the string "Fast Travel (Free)", THEN execute CONFIRM\_SELECTION to initiate the travel sequence.
+4. IF OCR detects a cap cost greater than 0, THEN abort the sequence, execute CLOSE\_MAP, and return to the IDLE state. This is a failsafe to prevent unintended resource expenditure.
+5. IF a secondary confirmation prompt appears, THEN execute CONFIRM\_SELECTION again to finalize travel.
+
+### **3.4 Sub-Protocol 3.4.1: Navigation Error Handling**
+
+This sub-protocol manages common failures during the fast travel attempt.
+
+1. IF OCR detects an error message containing "cannot fast travel when enemies are nearby", THEN initiate an evasion routine: execute SPRINT for 10 seconds in a vector away from the last known enemy position, then re-attempt the ENP.
+2. IF OCR detects an error message containing "cannot fast travel from this location", THEN execute FORWARD for 20 seconds to change position, then re-attempt the ENP.
+3. IF the ENP fails three consecutive times for any reason, THEN abort the current event target, execute CLOSE\_MAP, and return to the IDLE state to prevent persistent logic loops.
+
+## **4.0 On-Site Engagement Protocol (OEP)**
+
+### **4.1 Protocol Objective**
+
+To contribute effectively to the Public Event's objectives, maximize personal rewards through strategic combat, and ensure operational survival until the event concludes.
+
+### **4.2 Tactical Patience: The "Social Staging" Maneuver**
+
+A naive unit might begin interacting with objectives or engaging targets immediately upon arrival. However, data from player behavior indicates this is a suboptimal strategy. Many Public Events are balanced for multiple participants, and initiating the primary objective prematurely can trigger timers or enemy waves that a single unit cannot manage, leading to event failure and zero rewards. The probability of success is highly correlated with the number of allied players present. Therefore, an expert protocol incorporates a "social staging" period. A mandatory WAIT command upon arrival is not idle time; it is an active investment in a higher probability of success by allowing other human players time to gather.
+
+### **4.3 Sub-Protocol 4.3.1: Arrival & Staging**
+
+This sequence begins immediately after the fast travel loading screen concludes.
+
+1. IF fast travel is complete, THEN change state to ENGAGING and execute WAIT for 60 seconds.
+2. DURING the WAIT period, use the vision system to scan the compass and field of view for other player markers (white or blue dots).
+3. IF the 60-second timer expires, THEN proceed to **Sub-Protocol 4.5.1: Primary Combat Loop**, regardless of whether other players were detected. The unit must attempt the event, but the staging period respects the established cooperative strategy.
+
+### **4.4 Combat Doctrine: "VATS-Tagging" for Reward Maximization**
+
+The standard combat doctrine of focusing fire on a single target until it is neutralized is inefficient for reward acquisition in Public Events. To receive experience and loot from most non-legendary enemies, a player only needs to inflict a small amount of damage, a practice known as "tagging". The goal is not to secure every kill, but to distribute damage across the maximum number of targets. The VATS system is ideally suited for this. By using VATS to acquire a target, firing a single shot, and then immediately re-engaging VATS to cycle to the next target, the unit can tag dozens of enemies efficiently. This "VATS-Tagging" doctrine is a non-obvious, expert-level strategy that prioritizes widespread damage over focused elimination, thereby maximizing the total rewards gained from the event.
+
+### **4.5 Sub-Protocol 4.5.1: Primary Combat Loop (VATS-Tagging)**
+
+This loop is the core of the ENGAGING state.
+
+1. LOOP\_START:
+2. IF no hostile target is currently selected, THEN execute VATS.
+3. IF VATS acquires a hostile target, THEN execute AIM, followed by a single ATTACK command.
+4. IF the weapon has fired, THEN immediately execute VATS again to cycle to the next available hostile target.
+5. IF OCR detects a visual cue for low Action Points (AP), THEN execute WAIT for 3 seconds to allow for regeneration.
+6. IF OCR detects a visual cue for low or empty ammunition, THEN execute RELOAD.
+7. GOTO LOOP\_START.
+
+### **4.6 Sub-Protocol 4.6.1: Basic Survival Heuristics**
+
+These rules run concurrently with the combat loop to ensure unit survivability.
+
+1. IF the vision system detects the health indicator is below 25%, THEN interrupt the combat loop and execute BACKWARD for 3 seconds, followed by STRAFE\_LEFT for 3 seconds. This is a basic evasive maneuver designed to break the enemy's line of sight. Resume the combat loop after maneuvers are complete.
+
+## **5.0 Event Conclusion Protocol (ECP)**
+
+### **5.1 Protocol Objective**
+
+To correctly identify the conclusion of a Public Event, cease combat operations, and reset the unit's state to prepare for the next operational cycle.
+
+### **5.2 Sub-Protocol 5.2.1: Disengagement Triggers**
+
+This protocol dictates the transition from an ENGAGING state back to IDLE.
+
+1. IF OCR detects the on-screen text "Event Completed" or "Event Failed", THEN immediately cease all ATTACK and VATS commands.
+2. IF the event has concluded, THEN execute WAIT for 15 seconds. This pause ensures all server-side reward notifications and item grants are fully processed and registered by the client before the unit takes another action, preventing potential loss of rewards.
+3. AFTER the WAIT period, THEN reset the system state to IDLE and re-engage **Section 2.0: Event Detection Protocol**.
+
+## **Appendix A: Protocol Error Codes & Resolutions**
+
+### **Table A-1: Error Handling Matrix**
+
+This matrix provides a pre-defined set of solutions to common operational errors, ensuring the unit can autonomously resolve issues and maintain operational effectiveness.
+
+| Error Code | Condition | Resolution |
+| :---- | :---- | :---- |
+| ERR\_NAV\_01 | Fast travel fails due to nearby enemies. | Execute SPRINT for 10 seconds in a vector opposite the last known threat. Re-attempt **ENP**. If this fails 3 times, abort the current event target. |
+| ERR\_ENG\_01 | No hostile targets are available via VATS for more than 30 seconds during an active event. | Execute FORWARD for 5 seconds, then perform a 360-degree scan using SMOOTH\_LOOK. Re-attempt **OEP**. This routine is designed to reposition the unit if it becomes stuck on environmental geometry. |
+| ERR\_OCR\_01 | OCR fails to read a critical prompt (e.g., fast travel confirmation) after 3 attempts. | Abort the current action sequence (e.g., CONFIRM\_SELECTION) and return to the IDLE state to prevent an incorrect action based on incomplete data. |

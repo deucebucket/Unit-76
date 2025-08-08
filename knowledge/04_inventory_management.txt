@@ -1,0 +1,252 @@
+# **Knowledge Base: Inventory Management Protocol v1.1**
+
+## **Preamble: Foundational Assumptions and Core Philosophy**
+
+This document outlines the Inventory Management Protocol for an autonomous robotic unit operating within the *Fallout 76* simulation. The protocol is designed to ensure maximum operational mobility and efficiency by aggressively managing inventory weight. It is built upon two foundational principles: the abstraction of complex actions and the strategic treatment of the game world as an infinite resource container.
+
+### **Assumption of Action Abstraction**
+
+This protocol operates under the assumption that the INTERACT command is a high-level function capable of executing context-specific subroutines. The logic presented herein provides the decision-making framework for *when* to trigger these subroutines, not the low-level implementation of the subroutines themselves. Key abstracted actions include:
+
+* **INTERACT with a workbench:** This action is assumed to trigger a ScrapJunk() process, which automatically converts all items in the "Junk" category of the inventory into their constituent "Scrap" components. This is a critical function for weight reduction, as raw junk items are significantly heavier than their scrapped components.1
+* **INTERACT with the inventory User Interface (UI):** This action is assumed to enable a DiscardItem() subroutine, allowing for the permanent removal of a specified item or stack of items from the inventory. This is the primary mechanism for purging excess weight.
+* **INTERACT with a Plan/Recipe:** This action is assumed to trigger a LearnItem() subroutine. If the subroutine returns a failure state (indicating the plan is already known), it provides the logical trigger to then execute DiscardItem().
+
+### **Core Philosophy: The World is Infinite Storage**
+
+The central philosophy of this protocol is that resource hoarding is a fundamentally flawed strategy that leads to critical mobility failure. The game world contains infinitely respawning resources; any item discarded or not collected can be acquired again later with minimal effort.1 Therefore, the environment itself is treated as an unlimited, on-demand storage container. The robot's personal inventory and its limited-capacity Stash Box (1200 lbs) are not for long-term storage but are treated as temporary buffers for items required for immediate operational needs.3 This approach aggressively combats the primary cause of weight-related issues: the unnecessary accumulation of items "for later use".5 By adhering to this philosophy, the robot prioritizes mobility and combat readiness over the collection of non-essential assets.
+
+---
+
+## **Section 1: Directive 0: System State and Weight Budget Management**
+
+This section establishes the highest-level directives that govern all inventory-related subroutines. The primary function is to preemptively avoid the OVERENCUMBERED state, which is classified as a critical mobility failure. This is achieved through continuous monitoring of system states and adherence to a strict weight budget.
+
+### **1.1 Defining System States**
+
+The robot's operational status is defined by its current carry weight relative to its maximum capacity. The system will operate in one of three states:
+
+* **STATE: NOMINAL**: This is the desired operational state, defined as Current\_Weight being less than 80% of Max\_Weight. In this state, all systems function normally, and the robot has a sufficient buffer for acquiring new items during operations.
+* **STATE: CAUTION**: This state is triggered when Current\_Weight is between 80% and 99.9% of Max\_Weight. Upon entering this state, the robot must immediately prioritize proactive weight reduction protocols as detailed in Modules 1.0 through 5.0. No new non-essential items should be acquired until the state returns to NOMINAL.
+* **STATE: CRITICAL\_FAILURE (OVERENCUMBERED)**: This state is triggered when Current\_Weight is equal to or greater than Max\_Weight. This is a catastrophic failure condition. All other directives and objectives are suspended. The robot's sole priority becomes executing weight reduction protocols until STATE: CAUTION is re-established. The OVERENCUMBERED state incurs severe penalties, including the inability to fast travel, the rapid draining of Action Points (AP) during movement, and the complete prevention of sprinting.6
+
+The OVERENCUMBERED state is not a simple inconvenience; it is the entry point into a cascading failure loop that exponentially increases the probability of mission failure and unit destruction. The sequence of this failure loop is as follows:
+
+1. The OVERENCUMBERED status is triggered, immediately disabling fast travel and draining AP with any movement.7
+2. The loss of AP and the inability to sprint severely compromises the robot's ability to evade enemy attacks, leading to a higher rate of damage intake.
+3. Increased damage requires more frequent use of healing items like Stimpaks. These items have weight, and their consumption under duress does not solve the underlying weight problem.8
+4. If the robot engages and defeats enemies in this state, the loot from those enemies (weapons, armor, junk) adds further weight to the inventory, worsening the OVERENCUMBERED condition.
+5. With AP fully depleted, the robot becomes a stationary target, unable to perform combat maneuvers or escape. This state almost invariably leads to its destruction.
+
+Given the severity of this failure loop, the protocol must treat the 80% weight threshold not as a soft guideline, but as a hard-line trigger for immediate and aggressive inventory purging. The primary goal is always the preservation of mobility.
+
+### **1.2 The Weight Budget Allocation Protocol**
+
+To ensure the system remains in STATE: NOMINAL, the robot will operate on a strict weight budget. The total maximum carry weight (Max\_Weight) is a dynamic variable determined by the character's Strength attribute (150 \+ (Strength \* 5)) and other modifiers like backpacks or armor effects.10 The operational weight budget is set to 80% of this maximum. This budget is then allocated across key item categories to provide a structured framework for weight management.
+
+* **Weapons:** 35% of budget
+* **Armor:** 20% of budget
+* **Ammunition:** 20% of budget
+* **Aid/Consumables:** 15% of budget
+* **Loot Buffer:** 10% of budget (This buffer is reserved for the temporary weight of newly acquired items before they are processed, scrapped, or discarded.)
+
+IF the weight of items in any category exceeds its allocated budget, THEN the protocols for that category must be executed to bring it back within budget, even if the robot's total weight is still in STATE: NOMINAL. This proactive management prevents any single category from causing a sudden shift into STATE: CAUTION.
+
+---
+
+## **Section 2: Module 1.0: Junk and Scrap Processing Protocol**
+
+This module contains the most frequently executed routines for weight management. "Junk" items are the most common type of loot and, in their unprocessed state, are a primary contributor to inventory weight. The immediate conversion of "Junk" to its lighter "Scrap" components is a core operational priority.
+
+### **2.1 Sub-module 1.1: Workbench Interaction Mandate**
+
+The conversion of Junk to Scrap can only be performed at a workbench.1 Therefore, identifying and utilizing these stations is a critical task.
+
+* **Environmental Scanning Rule:**
+  * IF the vision system identifies an object that matches a profile in **Table 1.1: Workbench Identification Matrix**, THEN that object's location is logged as a high-priority "Target of Opportunity."
+* **Workbench Interaction Rule:**
+  * IF the inventory contains one or more items in the "Junk" category, AND a "Target of Opportunity" (workbench) is visible, AND the path to the target is clear of immediate threats, THEN execute pathfinding to the workbench, use the INTERACT command, and initiate the ScrapJunk() subroutine.
+
+This protocol ensures that junk is processed at every available opportunity, minimizing its time-in-inventory and its impact on the weight budget. While different workbenches have specialized primary functions (e.g., Weapons Workbench, Armor Workbench), all of them share the universal capability to perform the "Scrap All Junk" action, making any of them a valid target.11
+
+#### **Table 1.1: Workbench Identification Matrix**
+
+This matrix provides the robot's vision system with simple, reliable visual descriptors to identify the various crafting stations that can be used to scrap junk. The descriptions are based on common visual elements associated with each station type.
+
+| Workbench Type | Visual Descriptors |
+| :---- | :---- |
+| Weapons Workbench | A rectangular table, typically metal or wood, featuring a prominent, large gun vise clamped to one edge. The surface is often cluttered with loose tools, metal fragments, springs, and sometimes a disassembled weapon frame.12 |
+| Armor Workbench | A rectangular table distinguished by a large, upright sewing machine-like device. The surface may contain scraps of leather, metal plates, fabric bolts, and often a humanoid mannequin bust used for fitting.12 |
+| Tinker's Workbench | A highly cluttered table covered with electronic components. Key identifiers include radios, circuit boards, vacuum tubes, tangled wires, and often an articulated magnifying lamp. It appears disorganized and technical.12 |
+| Chemistry Station | A table equipped with laboratory apparatus. Look for glass beakers, test tubes in racks, Bunsen burners with open flames, and various chemical containers and bottles.12 |
+| Cooking Station | Can appear in two primary forms: a primitive campfire with a metal spit and a hanging pot, or a more advanced, standalone metal stove unit, often with a visible fire inside.12 |
+
+### **2.2 Sub-module 1.2: Junk Triage and Acquisition Rules**
+
+A naive "pick up all junk" strategy is inefficient and leads to rapid weight gain from low-value, common materials. The robot must employ a more sophisticated triage system, prioritizing junk items based on the rarity and utility of the components they provide.
+
+This is achieved through a "Tag for Search" system. The robot will maintain an internal list of high-priority components required for advanced repairs and crafting. When the vision system analyzes a potential loot item, it will cross-reference the components it provides against this tagged list.
+
+* **High-Priority Acquisition Rule:**
+  * IF an unowned item is identified as "Junk" AND it contains one or more components from **Table 1.2: High-Value Component Source List**, THEN execute INTERACT to acquire the item.
+* **Low-Priority Discard Rule:**
+  * IF the inventory contains more than 100 units of "Steel Scrap" or "Wood Scraps", THEN flag the excess quantity for immediate execution of the DiscardItem() subroutine. These components are ubiquitous and can be re-acquired with minimal effort, making them poor candidates for storage.4
+
+This selective looting strategy maximizes the intake of valuable components while minimizing the associated weight gain from common, heavy materials like glass and steel. It transforms the robot from a simple collector into an efficient scavenger, a key behavior of experienced operators.8
+
+#### **Table 1.2: High-Value Component Source List**
+
+This table programs the robot's selective looting behavior by mapping high-value components to the common junk items that contain them.
+
+| High-Value Component | Common Source Junk Items |
+| :---- | :---- |
+| Adhesive | Duct Tape, Military Grade Duct Tape, Sealed Wonderglue, Vegetable Starch 16 |
+| Ballistic Fiber | Military Ammo Bag, Military Grade Duct Tape, Torn Mothman Wing 16 |
+| Screws | Desk Fan, Typewriter, Globe, Hot Plate, Toy Car, Handcuffs 16 |
+| Springs | Battered Clipboard, Pocket Watch, Kitchen Scale, Fishing Rod, Giddyup Buttercup parts 16 |
+| Aluminum | Aluminum Can, TV Dinner Tray, Surgical Tray, Ski Pole, Coolant Cap, Carlisle Typewriter 16 |
+| Lead | Pencils, Tin Cans, Rat Poison, Paint Cans, Combination Wrench, Gym Weights, Makeshift Battery 16 |
+| Oil | Oil Can, Lighter, Fuel Tank, Cooking Oil, Soap, Blowtorch, Lantern 16 |
+| Circuits | Telephone, Military Grade Circuit Board, Enhanced Targeting Card, Scrap Assaultron Head 16 |
+
+---
+
+## **Section 3: Module 2.0: Equipment Management Protocol**
+
+This module establishes strict protocols for managing weapons and armor. The accumulation of redundant, underleveled, or situationally useless equipment is a frequent error that rapidly consumes inventory weight and provides no operational benefit.3
+
+### **3.1 Sub-module 2.1: Weapon Loadout and Redundancy Rules**
+
+To maintain combat flexibility while minimizing weight, the robot will adhere to a strict three-weapon operational loadout.
+
+* **Loadout Definition:** The standard loadout consists of:
+  1. **Primary Ranged Weapon:** The highest-damage weapon for the robot's primary combat style.
+  2. **Secondary Ranged Weapon:** A weapon that uses a different ammunition type than the primary, serving as a backup.
+  3. Melee Weapon: A zero-ammo-consumption weapon for conserving ammunition against weak targets or in low-threat environments.
+     This configuration provides tactical options for various engagement distances and scenarios without the weight burden of a large arsenal.1
+* **Redundancy Purge Rule:**
+  * IF a new weapon is acquired (e.g., from enemy loot), THEN its statistics must be compared against the three currently equipped weapons.
+  * IF the new weapon is not a direct statistical upgrade (higher damage, better effects) to one of the three equipped weapons, THEN it is classified as redundant and the DiscardItem() subroutine must be executed on it immediately.
+* **Underleveled Item Rule:**
+  * Weapons in the simulation are generated with level requirements. As the robot's own character level increases, lower-level weapons become obsolete.
+  * IF an equipped weapon's level is more than 10 levels below the robot's current character level, THEN that weapon is flagged as OBSOLETE.8
+  * IF a weapon is flagged as OBSOLETE AND a new, higher-level weapon of a similar type is acquired, THEN the OBSOLETE weapon must be discarded immediately upon equipping its replacement. There is no operational justification for retaining weapons that are significantly below the current character level.
+
+### **3.2 Sub-module 2.2: Armor and Power Armor Management Rules**
+
+Similar to weapons, the robot will only carry a single, optimal set of armor to minimize weight. Power Armor requires special handling due to its unique weight mechanics.
+
+* **Standard Armor Rule:**
+  * IF a piece of armor is acquired AND it is not a direct statistical upgrade to a piece in the currently equipped set, THEN it must be discarded immediately. The robot will never carry spare armor pieces or alternative sets in its inventory.
+* **Power Armor Rules:**
+  * Individual Power Armor pieces (arms, legs, torso, helmet) are extremely heavy and should not be carried in the inventory under any circumstances.3
+  * A Power Armor chassis (the frame) has a fixed weight of 10 lbs, regardless of how many armor pieces are attached to it. This makes the chassis an efficient way to transport a full set.9
+  * **Rule 3.2.2.1:** IF the vision system identifies a Power Armor piece that is not attached to a frame, THEN do not acquire it. The weight-to-benefit ratio is unacceptable.
+  * **Rule 3.2.2.2:** IF a full Power Armor frame (with or without pieces) is found, the robot may enter it to gain its benefits. However, the frame itself will not be picked up and stored in the inventory (recalled to inventory). It will be abandoned upon exiting.
+
+---
+
+## **Section 4: Module 3.0: Consumables Management Protocol**
+
+This module enforces strict quantitative limits on all consumable items (Aid, Food, Drink). While individual items have low weight, they are acquired in large quantities and can accumulate rapidly, leading to significant "weight creep" that pushes the system from STATE: NOMINAL to STATE: CAUTION without notice.8 The protocol is based on the principle that these items are abundant in the world, and hoarding is unnecessary.21
+
+### **4.1 Sub-module 3.1: Aid Item Limits**
+
+Healing items like Stimpaks are dropped frequently by enemies and found in containers. Carrying an excessive amount is one of the most common and easily corrected inventory errors. Experienced operators recommend carrying a small, fixed amount, confident that more can be acquired on demand.1
+
+* **Stimpak Rule:** MAINTAIN\_STIMPAK\_COUNT \= 20\. IF the quantity of standard Stimpaks in inventory exceeds 20, THEN the DiscardItem() subroutine must be executed on the excess amount. Super and Diluted Stimpaks should be discarded on sight, as standard Stimpaks provide the best balance of healing and weight.
+* **RadAway Rule:** MAINTAIN\_RADAWAY\_COUNT \= 10\. IF the quantity of RadAway in inventory exceeds 10, THEN discard the excess. Diluted RadAway should be discarded on sight.
+* **Chem Rule:** The operational benefit of most chems is situational. To avoid weight accumulation, the robot will only retain combat-focused chems. IF a chem is acquired AND its name is not "Psycho" or "Med-X", THEN discard it. Maintain a maximum quantity of 5 for both Psycho and Med-X.
+
+### **4.2 Sub-module 3.2: Sustenance Item Limits**
+
+Food and drink items are necessary to manage Hunger and Thirst meters, but they are also heavy and perishable.
+
+* **Spoiled Item Rule:**
+  * IF any food item's status changes to "spoiled", THEN it must be discarded immediately. Spoiled food provides no nutritional benefits, carries a high risk of disease, and serves only as dead weight.8 This check should be run periodically and after any period of waiting.
+* **Water Rule:**
+  * MAINTAIN\_WATER\_COUNT \= 10\. This limit applies only to "Purified Water." IF the quantity of Purified Water exceeds 10, discard the excess.
+  * IF any other type of water is acquired (e.g., "Dirty Water," "Toxic Water," "Boiled Water"), THEN discard it immediately. The risk of disease and lower benefit does not justify the weight.
+* **Food Rule:**
+  * IF the Hunger meter is below 50%, THEN consume any available food item to restore it.
+  * ELSE, maintain a maximum of 5 non-perishable food items (e.g., Canned Dog Food, Pork n' Beans, Salisbury Steak). All other food items, especially those with a condition bar indicating they can spoil, must be discarded to prevent them from becoming dead weight.
+
+---
+
+## **Section 5: Module 4.0: Ammunition Management Protocol**
+
+This module addresses the management of ammunition, another significant source of inventory weight. The weight of ammunition is not uniform; some types are exceptionally heavy and must be managed aggressively.
+
+### **5.1 Sub-module 4.1: Ammunition Type Discipline**
+
+The most effective rule for managing ammunition weight is to avoid carrying types that cannot be used.
+
+* **Core Rule:** The robot will only carry ammunition for its three currently equipped weapons. This is a simple, non-negotiable protocol to prevent the massive weight accumulation that results from collecting every ammo type found.3
+* **Mismatch Rule:**
+  * IF a quantity of ammunition is acquired, THEN its type must be checked against the ammo\_type property of the three equipped weapons.
+  * IF the acquired ammo type does not match any of the three required types, THEN the entire stack must be discarded immediately using the DiscardItem() subroutine.
+
+### **5.2 Sub-module 4.2: High-Weight Ammunition Purge**
+
+Not all ammunition contributes equally to the weight budget. A small number of explosive and energy cell types are disproportionately heavy and offer low utility unless a specific heavy weapon is part of the active loadout. These types are the primary cause of sudden, large increases in weight.3
+
+When the ammunition weight budget is exceeded, a targeted purge is more efficient than random discarding. Discarding a single Missile, for example, frees up the same weight as discarding hundreds of rounds of 5.56mm ammo.
+
+* **Priority Purge Rule:**
+  * IF the total weight of the ammunition category exceeds its 20% budget allocation, THEN begin executing the DiscardItem() subroutine on ammunition types in the descending order of priority specified in **Table 4.1: High-Weight Ammunition Discard Priority**. Continue this process until the category weight is back within budget.
+
+#### **Table 4.1: High-Weight Ammunition Discard Priority**
+
+This table provides a clear, ordered list for the robot to follow to achieve maximum weight reduction with the minimum number of actions. The highest priority items are discarded first.
+
+| Priority | Ammunition Type | Base Weight (per round) | Source(s) |
+| :---- | :---- | :---- | :---- |
+| 1 | Mini Nuke | 6.0 lbs | 25 |
+| 2 | Fusion Core | 3.0 lbs | 20 |
+| 3 | Missile | 2.0 lbs | 25 |
+| 4 | Plasma Core | 1.0 lbs | 5 |
+| 5 | 40mm Grenade Round | 0.5 lbs | 3 |
+| 6 | Cannonball | 0.5 lbs | 3 |
+
+---
+
+## **Section 6: Module 5.0: Miscellaneous and Data Item Protocol**
+
+This final module provides directives for all items that do not fit into the primary categories of Junk, Equipment, Consumables, or Ammunition. These items, while often overlooked, can contribute significantly to inventory weight.
+
+### **6.1 Gunpowder Rule**
+
+Gunpowder is a crafting component classified under "Miscellaneous" and is a common source of hidden weight, as it is looted from many enemy types and is not processed by the "Scrap All Junk" function.3
+
+* **Rule:** MAINTAIN\_GUNPOWDER\_COUNT \= 50\. IF the quantity of Gunpowder in inventory exceeds 50, THEN discard the excess.
+
+### **6.2 Plans and Recipes Rule**
+
+Plans and Recipes are data items that teach the robot new crafting abilities. Once a plan is learned, the physical data item becomes redundant dead weight. Each plan weighs 0.25 lbs, and accumulating known plans can add significant unnecessary weight.9
+
+* **Rule:** IF a "Plan" or "Recipe" item is acquired, THEN immediately execute the LearnItem() subroutine. IF this subroutine returns a FAILURE: ALREADY\_KNOWN status, THEN immediately execute the DiscardItem() subroutine on that item.
+
+### **6.3 Ore Rule**
+
+Ores are raw, unprocessed materials that are heavy and require a two-step process to become useful crafting components: smelting at a Chemistry Station with Acid.16 This process is inefficient and requires hoarding multiple component types.
+
+* **Rule:** IF the vision system identifies an item as "Ore" (e.g., "Iron Ore," "Lead Ore"), THEN do not acquire it. The robot will acquire its metals from scrapping weapons and junk, which is a more direct and weight-efficient method.
+
+### **6.4 Holotapes and Notes Rule**
+
+Holotapes and Notes are data items that primarily serve narrative functions. While most are weightless, some may have a non-zero weight value.
+
+* **Rule:** IF a "Note" or "Holotape" item is acquired AND its weight property is greater than 0, THEN execute the DiscardItem() subroutine on it after its initial interaction (i.e., after the text has been read or the audio has been played). There is no operational reason to retain these data items.
+
+## **Conclusions and Recommendations**
+
+The successful implementation of this Inventory Management Protocol will enable the autonomous unit to maintain peak operational mobility, a critical factor for survival and mission success in the *Fallout 76* environment. The core conclusion is that **proactive, aggressive, and rule-based purging of inventory is superior to reactive weight management.** The OVERENCUMBERED state is not merely a penalty but a catastrophic failure condition that must be avoided at all costs.
+
+The key recommendations derived from this protocol are:
+
+1. **Prioritize Mobility Over Acquisition:** The robot's programming must internalize that its primary function is not to hoard resources, but to remain mobile and combat-effective. The world is the only storage container with infinite capacity; the robot's inventory is a temporary buffer.
+2. **Automate Junk Processing:** The identification and use of workbenches to scrap junk should be a continuous, high-priority background task. Reducing the weight of junk into scrap components is the single most effective routine action for weight management.
+3. **Enforce Strict Quantitative Limits:** The use of hard limits for consumables and low-value scrap (e.g., 20 Stimpaks, 100 Steel) prevents the insidious issue of "weight creep" from many small items. These limits should be enforced rigorously.
+4. **Implement Selective Looting:** The robot must be programmed to differentiate between high-value and low-value junk. The "Tag for Search" system, guided by the High-Value Component Source List, is essential for efficient resource gathering without incurring prohibitive weight costs.
+
+By adhering to these directives, the robot will avoid the common pitfalls that encumber human players, allowing it to navigate the world, engage in combat, and complete objectives with maximum efficiency. This protocol provides a robust foundation for achieving mastery of the *Fallout 76* simulation.
